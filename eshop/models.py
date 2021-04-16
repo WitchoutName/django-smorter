@@ -3,7 +3,15 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
-import datetime, enum
+import datetime, json
+
+
+def item_img_path(instance, filename):
+    return f"media/shop/{instance.item.shop.id}/items/{instance.item.id}/{filename}"
+
+
+def shop_img_path(instance, filename):
+    return f"media/shop/{instance.id}/image/{filename}"
 
 
 class SmorterPermission(models.Model):
@@ -32,7 +40,7 @@ class SmorterGroup(models.Model):
         ordering = ["name"]
 
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.name} ({''.join([f'{y}, ' for y in set([x.type for x in self.permissions.all()])])[:-2]})"
 
 
 class SmorterUser(models.Model):
@@ -43,7 +51,7 @@ class SmorterUser(models.Model):
         ordering = ["user"]
 
     def __str__(self):
-        return f"{self.user.email}"
+        return f"{self.user.username}"
 
 
 @receiver(post_save, sender=User)
@@ -52,18 +60,95 @@ def create_profile(sender, instance, created, **kwargs):
         SmorterUser.objects.create(user=instance)
 
 
+class PaymentMethod(models.Model):
+    name = models.CharField(max_length=100, null=False, blank=False)
+
+    def __str__(self):
+        return self.name
+
+
+class ShipmentMethod(models.Model):
+    name = models.CharField(max_length=100, null=False, blank=False)
+
+    def __str__(self):
+        return self.name
+
+
 class Shop(models.Model):
     owner = models.ForeignKey(SmorterUser, null=False, blank=False, on_delete=models.CASCADE)
     title = models.CharField(max_length=100, null=False, blank=False)
     description = models.TextField()
     admin_group = models.OneToOneField(SmorterGroup, null=True, on_delete=models.SET_NULL)
+    payment_methods = models.ManyToManyField(PaymentMethod, blank=False, null=False)
+    shipment_methods = models.ManyToManyField(ShipmentMethod, blank=False, null=False)
     datetime = models.DateTimeField(default=datetime.datetime.now, blank=True)
+    image = models.ImageField(upload_to=shop_img_path, null=True)
 
     class Meta:
         ordering = ["owner"]
 
     def __str__(self):
         return f"{self.owner} - {self.title}"
+
+
+class Item(models.Model):
+    shop = models.ForeignKey(Shop, null=False, blank=False, on_delete=models.CASCADE)
+    title = models.CharField(max_length=150, blank=False, null=False)
+    description = models.TextField(blank=True, null=True)
+    path = models.CharField(max_length=200, blank=False, null=False)
+    price = models.DecimalField(decimal_places=2, max_digits=9, blank=False, null=False)
+    specs = models.CharField(max_length=1000, default={})
+
+    class Meta:
+        ordering = ["shop", "path"]
+
+    def __str__(self):
+        return f"{self.shop.title}/{self.path}/{self.title}"
+
+    def set_specs(self, value):
+        self.specs = json.dumps(value)
+
+    def get_specs(self):
+        return json.loads(self.specs)
+
+
+class ItemImage(models.Model):
+    item = models.ForeignKey(Item, null=False, blank=False, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to=item_img_path, null=False, blank=False)
+    alt = models.CharField(max_length=50, default="item_image")
+
+    def __str__(self):
+        return f"{self.item.id} - {self.alt}"
+
+
+class Order(models.Model):
+    customer = models.ForeignKey(SmorterUser, null=False, blank=False, on_delete=models.CASCADE)
+    items = models.ManyToManyField(Item, null=False, blank=False)
+    choices = models.CharField(max_length=1000, default={}, null=False, blank=False)
+    shop = models.ForeignKey(Shop, null=False, blank=False, on_delete=models.CASCADE)
+    payment_method = models.ForeignKey(PaymentMethod, null=True, blank=False, on_delete=models.SET_NULL)
+    shipment_method = models.ForeignKey(ShipmentMethod, null=True, blank=False, on_delete=models.SET_NULL)
+
+    class OrderStatus(models.TextChoices):
+        WP = 'WP', _('Waiting for payment')
+        OA = 'OA', _('Order accepted')
+        WS = 'WS', _('Waiting to be shipped')
+        WD = 'WD', _('Waiting for delivery')
+        AC = 'AC', _('Arrival confirmed')
+
+    status = models.CharField(max_length=15, choices=OrderStatus.choices, null=False, blank=False, default=OrderStatus.WP)
+
+    class Meta:
+        ordering = ["customer", "shop"]
+
+    def __str__(self):
+        return f"{self.customer} - {self.shop.title}"
+
+    def set_choices(self, value):
+        self.choices = json.dumps(value)
+
+    def get_choices(self):
+        return json.loads(self.choices)
 
 """
 class Choice(models.Model):

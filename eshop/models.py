@@ -40,7 +40,8 @@ class SmorterGroup(models.Model):
         ordering = ["name"]
 
     def __str__(self):
-        return f"{self.name} ({''.join([f'{y}, ' for y in set([x.type for x in self.permissions.all()])])[:-2]})"
+        # return f"{self.name} ({''.join([f'{y}, ' for y in set([x.type for x in self.permissions.all()])])[:-2]})"
+        return self.name
 
 
 class SmorterUser(models.Model):
@@ -75,14 +76,14 @@ class ShipmentMethod(models.Model):
 
 
 class Shop(models.Model):
-    owner = models.ForeignKey(SmorterUser, null=False, blank=False, on_delete=models.CASCADE)
-    title = models.CharField(max_length=100, null=False, blank=False)
+    owner = models.ForeignKey(SmorterUser, null=True, blank=True, on_delete=models.CASCADE)
+    title = models.CharField(max_length=100, null=False, blank=False, unique=True)
     description = models.TextField()
-    admin_group = models.OneToOneField(SmorterGroup, null=True, on_delete=models.SET_NULL)
+    admin_group = models.OneToOneField(SmorterGroup, null=True, blank=True, on_delete=models.SET_NULL)
     payment_methods = models.ManyToManyField(PaymentMethod, blank=False, null=False)
     shipment_methods = models.ManyToManyField(ShipmentMethod, blank=False, null=False)
     datetime = models.DateTimeField(default=datetime.datetime.now, blank=True)
-    image = models.ImageField(upload_to=shop_img_path, null=True)
+    image = models.ImageField(upload_to=shop_img_path, null=True, blank=True)
 
     class Meta:
         ordering = ["owner"]
@@ -149,6 +150,7 @@ class Order(models.Model):
 
     def get_choices(self):
         return json.loads(self.choices)
+    
 
 """
 class Choice(models.Model):

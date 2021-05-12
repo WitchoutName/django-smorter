@@ -1,0 +1,126 @@
+
+{% block content %}
+<center class="container" style="width: 40%;">
+    {% if method != "PUT" %}
+        <form method="{{ method }}" action="{% url 'create_shop' %}">
+    {% else %}
+        <form method="POST" action="{% url 'admin_shop' shop.id %}">
+    {% endif %}
+        {% csrf_token %}
+        {{ detail_form.title }}
+        {{ detail_form.title.errors }}
+        {{ detail_form.description }}
+        <div class="row g-3 mb-3">
+            <div class="col">
+                {{ detail_form.payment_methods.label }}
+                <select name="payment_methods" class="form-select" required id="id_payment_methods" multiple>
+                    {% for method in detail_form.payment_methods %}
+                       {{ method }}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col">
+                {{ detail_form.shipment_methods.label }}
+                <select name="shipment_methods" class="form-select" required id="id_shipment_methods" multiple>
+                    {% for method in detail_form.shipment_methods %}
+                       {{ method }}
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        {{ detail_form.image.label }}
+        {{ detail_form.image }}
+
+        <div class="row g-3 mb-3">
+            <label for="adminList">Add your admins:</label>
+            <div class="col">
+                <ul class="list-group" id="adminList">
+                    <li class="list-group-item">{{ user }}</li>
+                    {% if shop %}
+                        {% for admin in shop.admin_group.smorteruser_set.all %}
+                            {% if admin != user.smorteruser %}
+                                <li class="list-group-item" onclick='del_admin(this)' style="cursor: pointer;" >{{ admin }}</li>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="col">
+                <input type="search" id="userSearch" class="form-control rounded" placeholder="Search by usernames"/>
+                <ul class="list-group" id="userList">
+                    {% for u in users %}
+                        <li class="list-group-item" style="cursor: pointer;">{{ u }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <input type="text" name="admins" maxlength="100" id="admins">
+        {% if method != "PUT" %}
+            <button type="submit" class="btn btn-success">Create shop</button>
+        {% else %}
+            <button type="submit" class="btn btn-success">Update details</button>
+        {% endif %}
+        <br><br><br><br>
+    </form>
+</center>
+
+<style>
+    #userList li:hover{
+        background-color: #54c470;
+    }
+    #adminList li:hover{
+        background-color: #ff3333;
+    }
+    #adminList li:first-child{
+        background-color: #FFF;
+    }
+</style>
+
+<script>
+
+function del_admin(el){
+    res = $("#adminList li").filter((x, y)=>$(y).text() != $(el).text() || $(y).text() == '{{ user.username }}')
+    $("#adminList").empty()
+    for (let x of res){
+        $("#adminList").append(x)
+    }
+    update_admins()
+}
+
+function update_admins(){
+    $("#admins").val($("#adminList li").map((x,y) => $(y).text()).toArray().join())
+}
+
+$(document).ready(function(){
+    $("#admins").hide()
+    update_admins()
+    $("#userList li").filter(function() {
+        $(this).click(()=>{
+            $("#userSearch").val("")
+            $("#adminList").append(`<li class="list-group-item" onclick='del_admin(this)' style="cursor: pointer;" >${$(this).text()}</li>`)
+
+            $("#userList li").filter(function() {
+                $(this).toggle(false);
+            });
+            $(this).toggle(false);
+            update_admins()
+        });
+        $(this).toggle(false)
+    });
+
+    $("#userSearch").on("keyup", function() {
+    if($("#userSearch").val() == ""){
+        $("#userList li").filter(function() {
+            $(this).toggle(false)
+        });
+    }
+    else{
+    var value = $(this).val().toLowerCase();
+    $("#userList li").filter(function() {
+      $(this).toggle($(this).text().indexOf(value) > -1 && ! $("#adminList li").map((x,y) => $(y).text()).toArray().includes($(this).text()))
+    });
+    }
+    });
+});
+</script>
+{% endblock %}

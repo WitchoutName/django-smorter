@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<br><br>
+
+
+<div class="container" style="width: 50%;">
+    {% for shop in shops %}
+        <div class="card mb-3">
+            <div class="card-header"><strong>Owner:</strong> {{ shop.owner }}</div>
+            <div class="card-body">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-8">
+                        <h5 class="card-title"><strong>Title:</strong> {{ shop.title }}</h5>
+                        <p class="card-text"><strong>Description:</strong> {{ shop.description }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="card-text"><strong>Shop admins:</strong></h6>
+                        <ul>
+                            {% for admin in shop.admin_group.smorteruser_set.all %}
+                            <li class="card-text">{{ admin }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% if shop.owner.user != user %}
+                    <a href="#" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmLeave{{ shop.id }}">Leave</a>
+                {% else %}
+                    <a href="#" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDelete{{ shop.id }}">Delete</a>
+                {% endif %}
+                <a href="{% url 'admin_shop' shop.id %}" class="btn btn-success">Administrate</a>
+            </div>
+        </div>
+    <div class="modal fade" id="confirmLeave{{ shop.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" >Do you really want to leave "{{ shop.title }}" admin group?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <a type="button" class="btn btn-danger" href="{% url 'leave_shop' shop.id %}">Leave</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="confirmDelete{{ shop.id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" >Do you really want to permanently delete shop "{{ shop.title }}"?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <a type="button" class="btn btn-danger" href="{% url 'delete_shop' shop.id %}">Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endfor %}
+    <a href="{% url 'create_shop' %}" class="btn btn-success" role="button">Create new shop</a>
+
+</div>
+<br><br>
+{% endblock %}

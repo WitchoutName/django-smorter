@@ -24,7 +24,9 @@ from django.conf import settings
 # pomocí které zajistíme obsluhu statických souborů (jen ve vývojové fázi aplikace)
 from django.conf.urls.static import static
 # Mapování URL adres webu -propojení URL s jejich obsluhou
-urlpatterns = [path('admin/', admin.site.urls),
-               path('eshop/', include('eshop.urls')),
-               path('', RedirectView.as_view(url='eshop/'))
-               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('eshop.urls')),
+    path('auth/', include('django.contrib.auth.urls')),
+]

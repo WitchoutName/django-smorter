@@ -91,7 +91,7 @@ def leave_shop(request, id):
     return redirect('my_shops')
 
 
-def admin_shop(request, id):
+def admin_shop(request, id, tab, item_id=None):
     shop = get_object_or_404(Shop, id=id)
     if request.method == 'POST':
 
@@ -118,4 +118,4 @@ def admin_shop(request, id):
             print(detail_form.errors)
     else:
         detail_form = ShopCreateForm(instance=shop)
-    return render(request, 'eshop/shop/admin.html', {'detail_form': detail_form, "users": User.objects.all(), "method": "PUT", "shop": shop})
+    return render(request, 'eshop/shop/admin.html', {'detail_form': detail_form, "users": User.objects.all(), "method": "PUT", "shop": shop, "tab": tab, "item_id": item_id})

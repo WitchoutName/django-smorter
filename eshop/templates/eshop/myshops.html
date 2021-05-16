@@ -28,7 +28,7 @@
                 {% else %}
                     <a href="#" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDelete{{ shop.id }}">Delete</a>
                 {% endif %}
-                <a href="{% url 'admin_shop' shop.id %}" class="btn btn-success">Administrate</a>
+                <a href="{% url 'admin_shop' shop.id 'details' %}" class="btn btn-success">Administrate</a>
             </div>
         </div>
     <div class="modal fade" id="confirmLeave{{ shop.id }}" tabindex="-1" aria-hidden="true">

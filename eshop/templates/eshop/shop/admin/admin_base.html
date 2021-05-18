@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<br><br>
+<h1 class="text-center">Administration page of {{ shop.title }}</h1>
+<br>
+
+<div class="container bg-dark" style="width: 55%; min-height: 1080px;">
+    <div class="" id="tab-buttons" style="position: relative;">
+        <div class="btn-group-vertical" role="group" aria-label="Basic radio toggle button group" style="position: absolute; left: -100px;">
+            <a class="btn btn-outline-dark" id="details" href="{% url 'admin_shop' shop.id 'details' %}">Details</a>
+            <a class="btn btn-outline-dark" id="items" href="{% url 'admin_shop' shop.id 'items' %}">Items</a>
+            <a class="btn btn-outline-dark" id="orders" href="{% url 'admin_shop' shop.id 'orders' %}">Orders</a>
+        </div>
+    </div>
+    {% if tab == "details" %}
+        {% include "eshop/shop/admin/details.html" %}
+    {% elif tab == "items" %}
+        {% include "eshop/shop/admin/items.html" %}
+    {% elif tab == "orders" %}
+        {% include "eshop/shop/admin/orders.html" %}
+    {% endif %}
+</div>
+<style>
+    h2{
+        color: #FFF;
+        padding: 5px 0;
+    }
+</style>
+<script>
+$(document).ready(function(){
+    $('#{{ tab }}').css("background-color", "#212529")
+    $('#{{ tab }}').css("color", "white")
+})
+</script>
+
+{% endblock %}

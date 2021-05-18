@@ -3,9 +3,11 @@ from .forms import *
 from .models import *
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import User
+from django.core import serializers
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
 import random
+import operator
 
 
 def home(request):
@@ -91,10 +93,22 @@ def leave_shop(request, id):
     return redirect('my_shops')
 
 
-def admin_shop(request, id, tab, item_id=None):
+def admin_shop(request, id, tab, item_id=None, *args, **kwargs):
     shop = get_object_or_404(Shop, id=id)
-    if request.method == 'POST':
+    items = [x["fields"] for x in json.loads(serializers.serialize("json", Item.objects.all()))] if tab == "items" else []
+    query = dict(request.GET.lists())
+    categories = {}
+    for item in items:
+        cats = item["path"].split("/")
+        add_item(categories, cats, item)
+    current = get_deep_dict(categories, query["category"] if "category" in query else [])
+    bread = [["".join([f'category={sus}&' for sus in current["path"][:i+1]])[:-1], sub] for i, sub in enumerate(current["path"])] if "path" in current else []
+    cur_subs = [x for x in current if x not in ["items", "path"]]
+    subs = [["".join([f'category={sus}&' for sus in (current["path"] if "path" in current else []) +[sub]])[:-1], sub] for sub in cur_subs]
+    print(subs)
 
+    print(bread)
+    if request.method == 'POST':
         form_input = {**request.POST}
 
         for x in form_input.keys():
@@ -104,11 +118,7 @@ def admin_shop(request, id, tab, item_id=None):
         form_input["owner_id"] = form_input["owner"].id
         form_input["admin_group"] = SmorterGroup.objects.get(name=f"Shop{shop.id}AdminGroup")
         admins = form_input["admins"]
-        print(form_input)
-        print("-"*100)
         detail_form = ShopCreateForm(form_input, instance=shop)
-
-        print(detail_form.is_valid())
         if detail_form.is_valid():
             print(shop)
             set_shop_admins(shop, admins)
@@ -118,4 +128,25 @@ def admin_shop(request, id, tab, item_id=None):
             print(detail_form.errors)
     else:
         detail_form = ShopCreateForm(instance=shop)
-    return render(request, 'eshop/shop/admin.html', {'detail_form': detail_form, "users": User.objects.all(), "method": "PUT", "shop": shop, "tab": tab, "item_id": item_id})
+    return render(request, 'eshop/shop/admin/admin_base.html',
+                  {'detail_form': detail_form, "users": User.objects.all(),
+                   "method": "PUT", "shop": shop,
+                   "tab": tab, "current": current,
+                   "bread": bread, "subs": subs,
+                   })
+
+
+def add_item(dic, buffer, item):
+    if len(buffer) > 0:
+        if buffer[0] not in dic:
+            dic[buffer[0]] = {"items": [], "path": (dic["path"] if "path" in dic else []) + [buffer[0]]}
+        add_item(dic[buffer[0]], buffer[1:], item)
+    else:
+        dic["items"].append(item)
+
+
+def get_deep_dict(dic, path):
+    if len(path) > 0 and path[0] in dic:
+        return get_deep_dict(dic[path[0]], path[1:])
+    else:
+        return dic

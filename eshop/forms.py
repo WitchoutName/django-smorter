@@ -67,3 +67,21 @@ class ShopCreateForm(forms.ModelForm):
             "shipment_methods": forms.SelectMultiple(attrs={'class': 'form-select mb-3'}),
             "image": forms.FileInput(attrs={'class': 'form-control mb-3', "type": "file"}),
         }
+
+
+class ItemCreateForm(forms.ModelForm):
+
+    class Meta:
+        model =Item
+        fields = ["title", "description", "path", "price", "options"]
+        labels = {x:"" for x in fields}
+        labels["payment_methods"] = "Select your payment methods"
+        labels["shipment_methods"] = "Select your shipment methods"
+        labels["image"] = "Upload your banner"
+        widgets = {
+            "title": forms.TextInput(attrs={'class': 'form-control mb-3', 'placeholder': 'Shop title', 'required': 'true'}),
+            "description": forms.Textarea(attrs={'class': 'form-control mb-3', 'placeholder': 'Shop Description'}),
+            "payment_methods": forms.SelectMultiple(attrs={'class': 'form-select mb-3'}),
+            "shipment_methods": forms.SelectMultiple(attrs={'class': 'form-select mb-3'}),
+            "image": forms.FileInput(attrs={'class': 'form-control mb-3', "type": "file"}),
+        }

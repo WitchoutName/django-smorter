@@ -1,3 +1,6 @@
 from django.test import TestCase
 
-# Create your tests here.
+x = [1,2,3]
+print(x + [5])
+print(x[1:])
+

@@ -95,19 +95,11 @@ def leave_shop(request, id):
 
 def admin_shop(request, id, tab, item_id=None, *args, **kwargs):
     shop = get_object_or_404(Shop, id=id)
-    items = [x["fields"] for x in json.loads(serializers.serialize("json", Item.objects.all()))] if tab == "items" else []
     query = dict(request.GET.lists())
-    categories = {}
-    for item in items:
-        cats = item["path"].split("/")
-        add_item(categories, cats, item)
-    current = get_deep_dict(categories, query["category"] if "category" in query else [])
-    bread = [["".join([f'category={sus}&' for sus in current["path"][:i+1]])[:-1], sub] for i, sub in enumerate(current["path"])] if "path" in current else []
+    current = get_shop_current_cat(shop, query)
+    bread = [["".join([f'category={sus}&' for sus in current["path"][:i+1]])[:-1], sub] for i, sub in enumerate(current["path"])]
     cur_subs = [x for x in current if x not in ["items", "path"]]
     subs = [["".join([f'category={sus}&' for sus in (current["path"] if "path" in current else []) +[sub]])[:-1], sub] for sub in cur_subs]
-    print(subs)
-
-    print(bread)
     if request.method == 'POST':
         form_input = {**request.POST}
 
@@ -120,7 +112,6 @@ def admin_shop(request, id, tab, item_id=None, *args, **kwargs):
         admins = form_input["admins"]
         detail_form = ShopCreateForm(form_input, instance=shop)
         if detail_form.is_valid():
-            print(shop)
             set_shop_admins(shop, admins)
             detail_form.save()
 
@@ -131,7 +122,7 @@ def admin_shop(request, id, tab, item_id=None, *args, **kwargs):
     return render(request, 'eshop/shop/admin/admin_base.html',
                   {'detail_form': detail_form, "users": User.objects.all(),
                    "method": "PUT", "shop": shop,
-                   "tab": tab, "current": current,
+                   "tab": tab, "current": current, "query_path": (bread[-1][0] if bread else ""),
                    "bread": bread, "subs": subs,
                    })
 
@@ -150,3 +141,65 @@ def get_deep_dict(dic, path):
         return get_deep_dict(dic[path[0]], path[1:])
     else:
         return dic
+
+
+def get_shop_categories(shop):
+    categories = {"items": [], "path": []}
+    items = [[x["fields"], x["pk"]] for x in json.loads(serializers.serialize("json", shop.item_set.all()))]
+    for item, pk in items:
+        cats = item["path"].split("/")
+        item["id"] = pk
+        add_item(categories, cats, item)
+    return categories
+
+
+def get_shop_current_cat(shop, query):
+    cats = get_shop_categories(shop)
+    return get_deep_dict(cats, query["category"] if "category" in query else [])
+
+
+def create_item(request, id, *args, **kwargs):
+    shop = get_object_or_404(Shop, id=id)
+    query = dict(request.GET.lists())
+    current = get_shop_current_cat(shop, query)
+    if request.method == 'POST':
+        form_input = {**request.POST}
+        for x in form_input.keys():
+            form_input[x] = form_input[x][0]
+
+        form_input["shop"] = shop
+        images = request.FILES.getlist('images')
+        form = ItemCreateForm(form_input)
+
+        if form.is_valid():
+            item = form.save()
+
+            for img in images:
+                ItemImage.objects.create(
+                    item=item,
+                    image=img,
+                    alt=img.name.split(".")[0]
+                )
+            query = "".join([f'category={sus}&' for sus in item.path.split("/")])[:-1]
+            return redirect(f'/shop/{item.shop.id}/admin/items/?{query}')
+        else:
+            print(form.errors)
+    else:
+        form = ItemCreateForm()
+    return render(request, 'eshop/item/create.html', {
+        'item_form': form, "method": "POST",
+        "shop": shop, "query_path": "".join([f'category={sus}&' for sus in current["path"]])[:-1],
+        "path": "/".join(current["path"])})
+
+
+def delete_items(request, id):
+    shop = get_object_or_404(Shop, id=id)
+    query = dict(request.GET.lists())
+    ids = query["id"] if "id" in query else []
+    subs = query["category"] if "category" in query else []
+
+    if request.user.smorteruser in shop.admin_group.smorteruser_set.all():
+        for x in ids:
+            Item.objects.get(id=int(x)).delete()
+
+    return redirect(f'/shop/{shop.id}/admin/items/?{"".join([f"category={sus}&" for sus in subs])[:-1]}')

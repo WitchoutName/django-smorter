@@ -29,6 +29,11 @@ def signup(request):
     return render(request, 'registration/signup.html', {'form': form})
 
 
+def shop(request, id):
+    shop = get_object_or_404(Shop, id=id)
+    return render(request, 'eshop/shop/view.html', {"shop":  shop})
+
+
 def my_shops(request):
     shops = [a for tup in [list(Shop.objects.filter(admin_group__name=x.name)) for x in request.user.smorteruser.groups.all()] for a in tup]
     return render(request, 'eshop/myshops.html', {"shops":  shops})
@@ -65,8 +70,12 @@ def create_shop(request):
             [admin_group.permissions.add(x) for x in SmorterPermission.objects.filter(type="SA")]
             admin_group.save()
             shop = form.save()
+            print(shop.image)
+            shop.image = form.cleaned_data.get("image")
+            print(shop.image)
             shop.admin_group = admin_group
             shop.save()
+
             admin_group.name = f"Shop{shop.id}AdminGroup"
             set_shop_admins(shop, admins)
             shop.admin_group.save()
@@ -114,6 +123,10 @@ def admin_shop(request, id, tab, item_id=None, *args, **kwargs):
         if detail_form.is_valid():
             set_shop_admins(shop, admins)
             detail_form.save()
+            if detail_form.cleaned_data.get("image"):
+                shop.image = detail_form.cleaned_data.get("image")
+                shop.save()
+
 
         else:
             print(detail_form.errors)
@@ -203,3 +216,5 @@ def delete_items(request, id):
             Item.objects.get(id=int(x)).delete()
 
     return redirect(f'/shop/{shop.id}/admin/items/?{"".join([f"category={sus}&" for sus in subs])[:-1]}')
+
+

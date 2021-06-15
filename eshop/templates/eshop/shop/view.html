@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <center>
+        <div id="shop-view-info" class="container">
+            <div>
+                <h1 id="shop-title" {% if shop.image %} style="background:url('{{ shop.image.url }}') 50% 50% no-repeat" {% endif %}>{{ shop.title }}</h1>
+            </div>
+            <h4>{{ shop.description }}</h4>
+        </div>
+    </center>
+{% endblock %}

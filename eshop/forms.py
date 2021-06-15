@@ -79,7 +79,7 @@ class ItemCreateForm(forms.ModelForm):
 
     class Meta:
         model = Item
-        fields = ["shop","title", "description", "path", "price", "images"]
+        fields = ["shop", "title", "description", "path", "price", "images"]
         labels = {x: "" for x in fields}
         widgets = {
             "title": forms.TextInput(attrs={'class': 'form-control mb-3', 'placeholder': 'Item title', 'required': 'true'}),

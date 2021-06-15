@@ -7,11 +7,11 @@ import datetime, json
 
 
 def item_img_path(instance, filename):
-    return f"media/shop/{instance.item.shop.id}/items/{instance.item.id}/{filename}"
+    return f"media/media/shop/{instance.item.shop.id}/items/{instance.item.id}/{filename}"
 
 
 def shop_img_path(instance, filename):
-    return f"media/shop/{instance.id}/image/{filename}"
+    return f"media/media/shop/{instance.id}/image/{filename}"
 
 
 class SmorterPermission(models.Model):

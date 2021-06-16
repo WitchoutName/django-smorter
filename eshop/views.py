@@ -203,3 +203,9 @@ def delete_items(request, id):
             Item.objects.get(id=int(x)).delete()
 
     return redirect(f'/shop/{shop.id}/admin/items/?{"".join([f"category={sus}&" for sus in subs])[:-1]}')
+
+
+def catalog(request):
+    query = dict(request.GET.lists())
+    items = Item.objects.all()
+    return render(request, 'catalog.html', {"items":  items})

@@ -29,6 +29,11 @@ def signup(request):
     return render(request, 'registration/signup.html', {'form': form})
 
 
+def shop(request, id):
+    shop = get_object_or_404(Shop, id=id)
+    return render(request, 'eshop/shop/view.html', {"shop":  shop})
+
+
 def my_shops(request):
     shops = [a for tup in [list(Shop.objects.filter(admin_group__name=x.name)) for x in request.user.smorteruser.groups.all()] for a in tup]
     return render(request, 'eshop/myshops.html', {"shops":  shops})
@@ -67,6 +72,10 @@ def create_shop(request):
             shop = form.save()
             shop.admin_group = admin_group
             shop.save()
+            detail_form = ShopCreateForm(form_input, request.FILES, instance=shop)
+            if detail_form.is_valid():
+                detail_form.save()
+
             admin_group.name = f"Shop{shop.id}AdminGroup"
             set_shop_admins(shop, admins)
             shop.admin_group.save()
@@ -110,7 +119,7 @@ def admin_shop(request, id, tab, item_id=None, *args, **kwargs):
         form_input["owner_id"] = form_input["owner"].id
         form_input["admin_group"] = SmorterGroup.objects.get(name=f"Shop{shop.id}AdminGroup")
         admins = form_input["admins"]
-        detail_form = ShopCreateForm(form_input, instance=shop)
+        detail_form = ShopCreateForm(form_input, request.FILES, instance=shop)
         if detail_form.is_valid():
             set_shop_admins(shop, admins)
             detail_form.save()

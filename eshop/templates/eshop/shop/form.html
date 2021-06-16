@@ -2,9 +2,9 @@
 {% block content %}
 <center>
     {% if method != "PUT" %}
-        <form method="{{ method }}" action="{% url 'create_shop' %}">
+        <form method="{{ method }}" enctype="multipart/form-data" action="{% url 'create_shop' %}">
     {% else %}
-        <form method="POST" action="{% url 'admin_shop' shop.id 'details' %}">
+        <form method="POST" enctype="multipart/form-data" action="{% url 'admin_shop' shop.id 'details' %}">
     {% endif %}
         {% csrf_token %}
         {{ detail_form.title }}
@@ -40,7 +40,7 @@
                     {% if shop %}
                         {% for admin in shop.admin_group.smorteruser_set.all %}
                             {% if admin != user.smorteruser %}
-                                <li class="list-group-item" onclick='del_admin(this)' style="cursor: pointer;" >{{ admin }}</li>
+                                <li class="list-group-item" style="display: flex; justify-content: space-between; align-items: center; cursor:default;"><span>{{ admin }}</span><i class="fa fa-times" onclick='del_admin(this)' style="font-size:20px; color:red; cursor:pointer;"></i></li>
                             {% endif %}
                         {% endfor %}
                     {% endif %}
@@ -70,9 +70,6 @@
     #userList li:hover{
         background-color: #54c470;
     }
-    #adminList li:hover{
-        background-color: #ff3333;
-    }
     #adminList li:first-child{
         background-color: #FFF;
     }
@@ -81,7 +78,7 @@
 <script>
 
 function del_admin(el){
-    res = $("#adminList li").filter((x, y)=>$(y).text() != $(el).text() || $(y).text() == '{{ user.username }}')
+    res = $("#adminList li").filter((x, y)=>$(y).text() != $(el.parentNode).text() || $(y).text() == '{{ user.username }}')
     $("#adminList").empty()
     for (let x of res){
         $("#adminList").append(x)
@@ -99,7 +96,7 @@ $(document).ready(function(){
     $("#userList li").filter(function() {
         $(this).click(()=>{
             $("#userSearch").val("")
-            $("#adminList").append(`<li class="list-group-item" onclick='del_admin(this)' style="cursor: pointer;" >${$(this).text()}</li>`)
+            $("#adminList").append(`<li class="list-group-item" style="display: flex; justify-content: space-between; align-items: center; cursor: default;"><span>${$(this).text()}</span><i class="fa fa-times" onclick='del_admin(this)' style="font-size:20px; color:red; cursor:pointer;"></i></li>`)
 
             $("#userList li").filter(function() {
                 $(this).toggle(false);

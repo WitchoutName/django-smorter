@@ -1,3 +1,4 @@
+
 #catalog-filter{
     background-color: rgb(175, 175, 44);
 
@@ -13,3 +14,14 @@
 #catalog-itmes .card{
     width: 200px !important;
 }
+
+#shop-view-info{
+
+}
+
+#shop-title{
+    font-size: 60px;
+    padding: 100px;
+    background-color: rgb(202, 202, 202);
+    color: black;
+    font-weight: bold;

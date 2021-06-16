@@ -1,3 +1,3 @@
-from eshop.models import *
 
-print(SmorterPermission.object.filter(type="SA"))
+if {"a":1}.get("b"):
+    print(1)

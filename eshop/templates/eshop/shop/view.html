@@ -1,16 +1,73 @@
 {% extends "base.html" %}
+{% load tags %}
+{% load static %}
 
 {% block content %}
-    <center class="container">
-        <div id="shop-view-info">
+    <div class="container">
+        <div id="shop-view-info" class="text-center">
             <div>
                 <h1 id="shop-title" {% if shop.image %} style="background:url('{{ shop.image.url }}') 50% 50% no-repeat" {% endif %}>{{ shop.title }}</h1>
             </div>
             <h4>{{ shop.description }}</h4>
         </div>
-        <div id="shop-view-items">
+        <br><br>
+        <div id="shop-view-items" class="row">
             <div class="col-md-3" id="categories">
+                <h3>Categories</h3>
+                <ul></ul>
+            </div>
+            <div class="col-md-9" id="items">
+                {% for item in shop.item_set.all %}
+                <div class="card item" path="{{item.path}}">
+                    <div class="card-body">
+                        {% if item.itemimage_set.all|item_image %}
+                            <img class="card-img-top" src="{{ item.itemimage_set.all|item_image }}" alt="{{ item.title }}">
+                        {% else %}
+                            <img class="card-img-top" src="{% static 'img/item-placehloder.png' %}" alt="{{ item.title }}">
+                        {% endif %}
+                        <h5 class="card-title">{{ item.title }}</h5>
+                        <p class="card-text">{{ item.price }}</p>
+                        <a href="#" class="btn btn-primary btn-sm">View</a>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
         </div>
-    </center>
+    </div>
+    <script>
+        let cats = {{categories|safe}}
+        console.log(cats)
+        let catHTML = "<ul>"
+        
+        function appendMeu(parent, cat, level) {
+            for(let scat in cat) {
+                if (!(["items", "path"].includes(scat))){
+                    let subcat = parent.append(`<li class="${level > 0 ? 'subcategory' : 'category'}"><button onClick="$('#${scat}-list').collapse('toggle'); hide_imgs('${scat}')" class='cat-name'>${scat}</button></li>`)
+                        .find("li:last");
+                    if (cat[scat] != undefined){
+                        subcat = subcat.append(`<ul class="collapse" id="${scat}-list"></ul>`).find("ul");
+                        appendMeu(subcat, cat[scat], level + 1);
+                    }
+                    
+                }
+            }
+        }
+        
+        function hide_imgs(value){
+            $(".item").hide()
+            $(".item").filter(function() {
+                $(this).attr("path").split("/").forEach((x)=>{
+                    if (x == value)
+                        $(this).show()
+                })
+            });
+        }
+
+        $(function() {
+            appendMeu($("#categories ul"), cats, 0);
+            
+        });
+
+        catHTML += "</ul>"
+    </script>
 {% endblock %}

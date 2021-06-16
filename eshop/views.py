@@ -31,7 +31,10 @@ def signup(request):
 
 def shop(request, id):
     shop = get_object_or_404(Shop, id=id)
-    return render(request, 'eshop/shop/view.html', {"shop":  shop})
+    query = dict(request.GET.lists())
+    categories = get_shop_categories(shop)
+
+    return render(request, 'eshop/shop/view.html', {"shop":  shop, "categories": categories})
 
 
 def my_shops(request):
@@ -54,7 +57,7 @@ def set_shop_admins(shop, admins):
 
 
 def create_shop(request):
-    if request.method == 'POST':
+    if request.method.upper() == 'POST':
         form_input = {**request.POST}
         for x in form_input.keys():
             if "methods" not in x:
@@ -81,6 +84,8 @@ def create_shop(request):
             if detail_form.is_valid():
                 shop = detail_form.save()
                 shop.admin_group = admin_group
+            else:
+                print(detail_form.errors)
 
 
 

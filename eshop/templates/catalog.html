@@ -1,0 +1,36 @@
+{% extends "base.html" %} {% block content %}
+<center id="catalog" class="container">
+  <br />
+  <br />
+  <h1>Somorter item catalog</h1>
+  <br />
+
+  <div class="container bg-dark row" style="width: 100%; min-height: 1080px;">
+    <div class="col-md-2" id="catalog-filter">
+    nsdlfnsdjkfn
+    </div>
+    <center id="catalog-items" class="col-md-10">
+        {% for item in items %}
+            <div class="card">
+            <img src="..." class="card-img-top" alt="...">
+            <div class="card-body">
+                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+            </div>
+            </div>
+        {% endfor %}
+    </center>
+  </div>
+  <style>
+    h2 {
+      color: #fff;
+      padding: 5px 0;
+    }
+  </style>
+  <script>
+    $(document).ready(function () {
+      $("#{{ tab }}").css("background-color", "#212529");
+      $("#{{ tab }}").css("color", "white");
+    });
+  </script>
+</center>
+{% endblock %}

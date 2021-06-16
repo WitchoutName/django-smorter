@@ -1,0 +1,15 @@
+#catalog-filter{
+    background-color: rgb(175, 175, 44);
+
+}
+
+#catalog-itmes{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+#catalog-itmes .card{
+    width: 200px !important;
+}

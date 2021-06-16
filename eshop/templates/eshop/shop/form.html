@@ -2,9 +2,9 @@
 {% block content %}
 <center>
     {% if method != "PUT" %}
-        <form method="{{ method }}" action="{% url 'create_shop' %}">
+        <form method="{{ method }}" enctype="multipart/form-data" action="{% url 'create_shop' %}">
     {% else %}
-        <form method="POST" action="{% url 'admin_shop' shop.id 'details' %}">
+        <form method="POST" enctype="multipart/form-data" action="{% url 'admin_shop' shop.id 'details' %}">
     {% endif %}
         {% csrf_token %}
         {{ detail_form.title }}

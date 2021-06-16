@@ -62,7 +62,7 @@ def create_shop(request):
         form_input["owner"] = request.user.smorteruser
         form_input["owner_id"] = form_input["owner"].id
         admins = form_input["admins"]
-        form = ShopCreateForm(form_input)
+        form = ShopCreateForm(form_input, request.FILES)
         if form.is_valid():
             admin_group = SmorterGroup()
             admin_group.name = f"{random.random()}"
@@ -70,11 +70,11 @@ def create_shop(request):
             [admin_group.permissions.add(x) for x in SmorterPermission.objects.filter(type="SA")]
             admin_group.save()
             shop = form.save()
-            print(shop.image)
-            shop.image = form.cleaned_data.get("image")
-            print(shop.image)
             shop.admin_group = admin_group
             shop.save()
+            detail_form = ShopCreateForm(form_input, request.FILES, instance=shop)
+            if detail_form.is_valid():
+                detail_form.save()
 
             admin_group.name = f"Shop{shop.id}AdminGroup"
             set_shop_admins(shop, admins)
@@ -119,13 +119,10 @@ def admin_shop(request, id, tab, item_id=None, *args, **kwargs):
         form_input["owner_id"] = form_input["owner"].id
         form_input["admin_group"] = SmorterGroup.objects.get(name=f"Shop{shop.id}AdminGroup")
         admins = form_input["admins"]
-        detail_form = ShopCreateForm(form_input, instance=shop)
+        detail_form = ShopCreateForm(form_input, request.FILES, instance=shop)
         if detail_form.is_valid():
             set_shop_admins(shop, admins)
             detail_form.save()
-            if detail_form.cleaned_data.get("image"):
-                shop.image = detail_form.cleaned_data.get("image")
-                shop.save()
 
 
         else:

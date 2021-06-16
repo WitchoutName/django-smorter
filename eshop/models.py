@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
-import datetime, json
+import datetime, json, os
 
 
 def item_img_path(instance, filename):
@@ -11,6 +11,13 @@ def item_img_path(instance, filename):
 
 
 def shop_img_path(instance, filename):
+    path = f"media/media/shop/{instance.id}/image/"
+    try:
+        for file in os.listdir("media/"+path):
+            print("file:", file)
+            os.remove("media/"+path+file)
+    except:
+        pass
     return f"media/media/shop/{instance.id}/image/{filename}"
 
 
@@ -89,7 +96,11 @@ class Shop(models.Model):
         ordering = ["owner"]
 
     def __str__(self):
-        return f"{self.owner} - {self.title}"
+        return f"{self.id}|{self.owner} - {self.title}"
+
+    def delete(self, *args, **kwargs):
+        self.admin_group.delete()
+        return super(self.__class__, self).delete(*args, **kwargs)
 
 
 class Item(models.Model):

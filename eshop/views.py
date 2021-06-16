@@ -62,7 +62,7 @@ def create_shop(request):
         form_input["owner"] = request.user.smorteruser
         form_input["owner_id"] = form_input["owner"].id
         admins = form_input["admins"]
-        form = ShopCreateForm(form_input)
+        form = ShopCreateForm(form_input, request.FILES)
         if form.is_valid():
             admin_group = SmorterGroup()
             admin_group.name = f"{random.random()}"
@@ -70,15 +70,19 @@ def create_shop(request):
             [admin_group.permissions.add(x) for x in SmorterPermission.objects.filter(type="SA")]
             admin_group.save()
             shop = form.save()
+            print("a", admin_group)
             shop.admin_group = admin_group
+            print("a", shop.admin_group)
             shop.save()
+            admin_group.name = f"Shop{shop.id}AdminGroup"
+            admin_group.save()
+            set_shop_admins(shop, admins)
             detail_form = ShopCreateForm(form_input, request.FILES, instance=shop)
             if detail_form.is_valid():
-                detail_form.save()
+                shop = detail_form.save()
+                shop.admin_group = admin_group
 
-            admin_group.name = f"Shop{shop.id}AdminGroup"
-            set_shop_admins(shop, admins)
-            shop.admin_group.save()
+
 
             return redirect('my_shops')
         else:

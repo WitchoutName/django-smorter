@@ -231,19 +231,31 @@ def bs(*args):
 @csrf_exempt
 def catalog(request):
     filters = {x: y[0] for x, y in {**request.POST}.items()}
-    for x in ["search", "minPrice", "maxPrice"]:
+    for x, y in [["search", None], ["minPrice", None], ["maxPrice", None], ["itemsPerPage", 20], ["page", 1]]:
         if x not in filters:
-            filters[x] = None
+            filters[x] = y
 
-    print(filters)
-    items = Item.objects.all()
+    items = [x for x in Item.objects.all()]
     if filters["search"] not in [None, ""]:
         items = [x for x in items if filters["search"] in x.title]
-        print("s:",items)
     if filters["minPrice"]:
         items = [x for x in items if float(filters["minPrice"]) < float(x.price)]
-        print("min:",[x.price for x in items])
     if filters["maxPrice"]:
         items = [x for x in items if float(filters["maxPrice"]) > float(x.price)]
-        print("max:",items)
-    return render(request, 'catalog.html', {"items":  items, "filters": filters})
+
+    page_items = [[]]
+    i = 0
+    while len(items) > 0:
+        if i < int(filters["itemsPerPage"]):
+            page_items[-1].append(items[0])
+            items.pop(0)
+            i += 1
+        else:
+            i = 0
+            page_items.append([])
+
+    filters["page"] = int(filters["page"])
+    if int(filters["page"]) > len(page_items):
+        filters["page"] = len(page_items)
+
+    return render(request, 'catalog.html', {"items":  page_items[filters["page"]-1], "filters": filters, "page_count": len(page_items)})

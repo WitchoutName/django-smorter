@@ -225,5 +225,10 @@ def delete_items(request, id):
 
 def catalog(request):
     query = dict(request.GET.lists())
-    items = Item.objects.all()
-    return render(request, 'catalog.html', {"items":  items})
+    search = None
+    if "search" in query:
+        search = query["search"][0]
+        items = [x for x in Item.objects.all() if query["search"][0] in x.title]
+    else:
+        items = Item.objects.all()
+    return render(request, 'catalog.html', {"items":  items, "search": search})

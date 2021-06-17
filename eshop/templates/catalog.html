@@ -6,36 +6,43 @@
 <div id="catalog" class="container">
   <br />
   <br />
-  <h1>Somorter item catalog</h1>
+  <h1 class="text-center" >Somorter item catalog</h1>
   <br />
 
-  <div class="container bg-dark row" style="width: 100%; min-height: 1080px;">
-    <div class="col-md-2" id="catalog-filter">
+  <div class="container row catalog">
+    <div class="col-md-3" id="catalog-filter">
     nsdlfnsdjkfn
     </div>
-    <div id="catalog-items" class="col-md-10">
-        <div class="col-md-9" id="items">
-        {% for item in items %}
-          <div class="card item" path="{{item.path}}">
-              <div class="card-body">
-                  {% if item.itemimage_set.all|item_image %}
-                      <img class="card-img-top" src="{{ item.itemimage_set.all|item_image }}" alt="{{ item.title }}">
-                  {% else %}
-                      <img class="card-img-top" src="{% static 'img/item-placehloder.png' %}" alt="{{ item.title }}">
-                  {% endif %}
-                  <h5 class="card-title">{{ item.title }}</h5>
-                  <p class="card-text">{{ item.price }}</p>
-                  <a href="#" class="btn btn-primary btn-sm">View</a>
-              </div>
-          </div>
-        {% endfor %}
+    <div id="catalog-items" class="col-md-9">
+      <div class="input-group" id="itemSearch">
+        <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search"
+          aria-describedby="search-addon" />
+        <button type="button" class="btn btn-outline-primary" onClick='window.location.href = `{% url "catalog" %}?search=${$("#itemSearch input").val()}`;'>search</button>
+      </div>
+      <div id="items">
+      {% for item in items %}
+        <div class="card item" path="{{item.path}}">
+            <div class="card-body">
+                {% if item.itemimage_set.all|item_image %}
+                    <img class="card-img-top" src="{{ item.itemimage_set.all|item_image }}" alt="{{ item.title }}">
+                {% else %}
+                    <img class="card-img-top" src="{% static 'img/item-placehloder.png' %}" alt="{{ item.title }}">
+                {% endif %}
+                <h5 class="card-title">{{ item.title }}</h5>
+                <p class="card-text">{{ item.price }}</p>
+                <a href="#" class="btn btn-primary btn-sm">View</a>
+            </div>
+        </div>
+      {% endfor %}
     </div>
   </div>
   <script>
     $(document).ready(function () {
-      $("#{{ tab }}").css("background-color", "#212529");
-      $("#{{ tab }}").css("color", "white");
+        {% if search %}
+          $("#itemSearch input").val("{{ search }}")
+        {% endif %}
     });
+
   </script>
 </div>
 {% endblock %}

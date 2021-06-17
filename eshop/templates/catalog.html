@@ -2,47 +2,63 @@
 {% load tags %}
 {% load static %}
 
- {% block content %}
+{% block content %}
 <div id="catalog" class="container">
-  <br />
-  <br />
-  <h1 class="text-center" >Somorter item catalog</h1>
-  <br />
+  <br>
+  <br>
+  <h1 class="text-center">Somorter item catalog</h1>
+  <br>
 
-  <div class="container row catalog">
-    <div class="col-md-3" id="catalog-filter">
-    nsdlfnsdjkfn
-    </div>
-    <div id="catalog-items" class="col-md-9">
-      <div class="input-group" id="itemSearch">
-        <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search"
-          aria-describedby="search-addon" />
-        <button type="button" class="btn btn-outline-primary" onClick='window.location.href = `{% url "catalog" %}?search=${$("#itemSearch input").val()}`;'>search</button>
-      </div>
-      <div id="items">
-      {% for item in items %}
-        <div class="card item" path="{{item.path}}">
-            <div class="card-body">
-                {% if item.itemimage_set.all|item_image %}
-                    <img class="card-img-top" src="{{ item.itemimage_set.all|item_image }}" alt="{{ item.title }}">
-                {% else %}
-                    <img class="card-img-top" src="{% static 'img/item-placehloder.png' %}" alt="{{ item.title }}">
-                {% endif %}
-                <h5 class="card-title">{{ item.title }}</h5>
-                <p class="card-text">{{ item.price }}</p>
-                <a href="#" class="btn btn-primary btn-sm">View</a>
-            </div>
+  <form method="POST" action="{% url 'catalog' %}">
+    <div class="container row catalog">
+      <div class="col-md-3" id="catalog-filter">
+        <h3>Filters</h3>
+        <div class="form-group row">
+          <label for="minPrice" class="col-sm-6 col-form-label">Min price</label>
+          <div class="col-sm-6">
+            <input type="number" class="form-control" id="minPrice" name="minPrice"  placeholder="1" {% if filters.minPrice %}value="{{ filters.minPrice }}"{% endif %}>
+          </div>
         </div>
-      {% endfor %}
-    </div>
-  </div>
-  <script>
-    $(document).ready(function () {
-        {% if search %}
+        <div class="form-group row">
+          <label for="maxPrice" class="col-sm-6 col-form-label">Max price</label>
+          <div class="col-sm-6">
+            <input type="number" class="form-control" id="maxPrice"  name="maxPrice" placeholder="1000" {% if filters.maxPrice %}value="{{ filters.maxPrice }}"{% endif %}>
+          </div>
+        </div>
+      </div>
+      <div id="catalog-items" class="col-md-9">
+        <div class="input-group" id="itemSearch">
+          <input type="search" class="form-control rounded" placeholder="Search" name="search" aria-label="Search"
+            aria-describedby="search-addon" {% if filters.search %}value="{{ filters.search }}"{% endif %}/>
+          <button type="submit" class="btn btn-outline-primary">search</button>
+        </div>
+        <div id="items">
+          {% for item in items %}
+          <div class="card item" path="{{item.path}}">
+            <div class="card-body">
+              {% if item.itemimage_set.all|item_image %}
+              <img class="card-img-top" src="{{ item.itemimage_set.all|item_image }}" alt="{{ item.title }}">
+              {% else %}
+              <img class="card-img-top" src="{% static 'img/item-placehloder.png' %}" alt="{{ item.title }}">
+              {% endif %}
+              <h5 class="card-title item-title">{{ item.title|item_title:filters.search|safe }}</h5>
+              <p class="card-text">{{ item.price }}$</p>
+              <a href="#" class="btn btn-primary btn-sm">View</a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <script>
+        $(document).ready(function () {
+          {% if search %}
           $("#itemSearch input").val("{{ search }}")
-        {% endif %}
-    });
+          {% endif %}
+        });
 
-  </script>
+      </script>
+    </div>
+  </form>
 </div>
+
 {% endblock %}

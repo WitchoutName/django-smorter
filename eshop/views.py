@@ -1,4 +1,6 @@
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+
 from .forms import *
 from .models import *
 from django.contrib.auth import login, authenticate
@@ -223,12 +225,25 @@ def delete_items(request, id):
     return redirect(f'/shop/{shop.id}/admin/items/?{"".join([f"category={sus}&" for sus in subs])[:-1]}')
 
 
+def bs(*args):
+    print(*args)
+
+@csrf_exempt
 def catalog(request):
-    query = dict(request.GET.lists())
-    search = None
-    if "search" in query:
-        search = query["search"][0]
-        items = [x for x in Item.objects.all() if query["search"][0] in x.title]
-    else:
-        items = Item.objects.all()
-    return render(request, 'catalog.html', {"items":  items, "search": search})
+    filters = {x: y[0] for x, y in {**request.POST}.items()}
+    for x in ["search", "minPrice", "maxPrice"]:
+        if x not in filters:
+            filters[x] = None
+
+    print(filters)
+    items = Item.objects.all()
+    if filters["search"] not in [None, ""]:
+        items = [x for x in items if filters["search"] in x.title]
+        print("s:",items)
+    if filters["minPrice"]:
+        items = [x for x in items if float(filters["minPrice"]) < float(x.price)]
+        print("min:",[x.price for x in items])
+    if filters["maxPrice"]:
+        items = [x for x in items if float(filters["maxPrice"]) > float(x.price)]
+        print("max:",items)
+    return render(request, 'catalog.html', {"items":  items, "filters": filters})

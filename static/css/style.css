@@ -1,8 +1,14 @@
 
 #catalog-filter{
     background-color: rgb(239, 239, 239);
-
+    padding: 20px;
 }
+
+#catalog-filter h3{
+    text-align: center;
+    border-bottom: 1px rgb(204, 204, 204) solid;
+}
+
 
 #catalog-itmes{
     text-align: center;
@@ -20,9 +26,8 @@
 #categories h3{
     text-align: center;
     padding: 5px;
-    border-bottom: thin black solid;
+    border-bottom: 1px rgb(204, 204, 204) solid;
 }
-
 
 #categories button{
     border: none !important;
@@ -69,6 +74,11 @@
     margin-bottom: 20px;
 }
 
+.item-title{
+    margin-top: 2px;
+    padding: 2px;
+}
+
 .item .card-body{
     padding: 10px;
 }
@@ -82,4 +92,8 @@
     width: 100%; 
     padding: 0;
     min-height: 1080px;
+}
+
+.searched{
+    background-color: khaki;
 }

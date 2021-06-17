@@ -54,18 +54,43 @@
             <input type="number" class="form-control" id="itemsPerPage"  name="itemsPerPage" placeholder="20" {% if filters.itemsPerPage %}value="{{ filters.itemsPerPage }}"{% endif %}>
           </div>
         </div>
-        <div class="form-group row">
-          <label for="page" class="col-sm-6 col-form-label">Page</label>
-          <div class="col-sm-6">
-            <input type="number" class="form-control" id="page"  name="page" placeholder="0" {% if filters.page %}value="{{ filters.page }}"{% endif %}> / {{ page_count }}
-          </div>
+
+        <input type="number" class="form-control" id="page" hidden name="page" placeholder="0" {% if filters.page %}value="{{ filters.page }}"{% endif %}>
+        <br>
+        <div id="pagination">
         </div>
       </div>
       <script>
+        
+        function setPage(page){
+          $("#page").val(page)
+        }
+
         $(document).ready(function () {
           {% if search %}
           $("#itemSearch input").val("{{ search }}")
           {% endif %}
+          
+          $("#pagination").append(`
+          <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+              <li class="page-item {% if filters.page == 1 %}disabled{% endif %}">
+                <button class="page-link" onClick='setPage({{ filters.page }}-1)'>Previous</button>
+              </li>
+              {% for page in page_count|range %}
+                <li class="page-item"><button class="page-link number-link {% if filters.page == page|add:1 %}active-page{% endif %}">{{ page|add:1 }}</button></li>
+              {% endfor %}
+              <li class="page-item {% if filters.page == page_count %}disabled{% endif %}">
+                <button class="page-link" onClick='setPage({{ filters.page }}+1)'>Next</button>
+              </li>
+            </ul>
+          </nav>
+          `)
+
+          $(".number-link").click((x)=>{
+            setPage($(x.currentTarget).text())
+          })
+
         });
 
       </script>

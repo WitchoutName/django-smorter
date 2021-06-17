@@ -97,3 +97,20 @@
 .searched{
     background-color: khaki;
 }
+
+#pagination{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+#pagination div{
+
+}
+
+.active-page{
+    font-weight: bold !important;
+    cursor:default !important;
+    color: black !important;
+}

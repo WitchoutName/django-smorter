@@ -11,3 +11,7 @@ def item_image(value):
 @register.filter(name='item_title')
 def item_title(title, search):
     return title.replace(search, f"<span class='searched'>{search}</span>") if search else title
+
+@register.filter(name='range')
+def range_tag(value):
+    return range(value)

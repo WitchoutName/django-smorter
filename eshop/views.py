@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.core import serializers
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
-import random
+import random, json
 import operator
 
 
@@ -192,6 +192,7 @@ def create_item(request, id, *args, **kwargs):
         form = ItemCreateForm(form_input)
 
         if form.is_valid():
+            print(form["specs"])
             item = form.save()
 
             for img in images:
@@ -210,6 +211,42 @@ def create_item(request, id, *args, **kwargs):
         'item_form': form, "method": "POST",
         "shop": shop, "query_path": "".join([f'category={sus}&' for sus in current["path"]])[:-1],
         "path": "/".join(current["path"])})
+
+
+def edit_item(request, id, item_id, *args, **kwargs):
+    shop = get_object_or_404(Shop, id=id)
+    item = get_object_or_404(Item, id=item_id)
+    specs = json.loads(item.specs)
+    query = dict(request.GET.lists())
+    current = get_shop_current_cat(shop, query)
+    if request.method == 'POST':
+        form_input = {**request.POST}
+        for x in form_input.keys():
+            form_input[x] = form_input[x][0]
+
+        form_input["shop"] = shop
+        images = request.FILES.getlist('images')
+        form = ItemCreateForm(form_input, instance=item)
+
+        if form.is_valid():
+            item = form.save()
+
+            for img in images:
+                ItemImage.objects.create(
+                    item=item,
+                    image=img,
+                    alt=img.name.split(".")[0]
+                )
+            query = "".join([f'category={sus}&' for sus in item.path.split("/")])[:-1]
+            return redirect(f'/shop/{item.shop.id}/admin/items/?{query}')
+        else:
+            print(form.errors)
+    else:
+        form = ItemCreateForm(instance=item)
+    return render(request, 'eshop/item/create.html', {
+        'item_form': form, "method": "PUT",
+        "shop": shop, "item": item, "query_path": "".join([f'category={sus}&' for sus in current["path"]])[:-1],
+        "path": "/".join(current["path"]), "specs": specs})
 
 
 def delete_items(request, id):

@@ -105,12 +105,28 @@
     flex-wrap: wrap;
 }
 
-#pagination div{
-
-}
 
 .active-page{
     font-weight: bold !important;
     cursor:default !important;
     color: black !important;
+}
+
+.item-parameter-option{
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    cursor: default;
+}
+
+.cross-icon-small{
+    font-size:20px !important; 
+    color:red; 
+    cursor:pointer;
+}
+
+.cross-icon-big{
+    font-size:25px !important; 
+    color:red; 
+    cursor:pointer;
 }

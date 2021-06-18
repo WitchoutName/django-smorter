@@ -16,20 +16,19 @@
         <div class="form-group row">
           <label for="minPrice" class="col-sm-6 col-form-label">Min price</label>
           <div class="col-sm-6">
-            <input type="number" class="form-control" id="minPrice" name="minPrice"  placeholder="1" {% if filters.minPrice %}value="{{ filters.minPrice }}"{% endif %}>
+            <input type="number" class="form-control" id="minPrice" name="minPrice" placeholder="1" {% if filters.minPrice %}value="{{ filters.minPrice }}" {% endif %}>
           </div>
         </div>
         <div class="form-group row">
           <label for="maxPrice" class="col-sm-6 col-form-label">Max price</label>
           <div class="col-sm-6">
-            <input type="number" class="form-control" id="maxPrice"  name="maxPrice" placeholder="1000" {% if filters.maxPrice %}value="{{ filters.maxPrice }}"{% endif %}>
+            <input type="number" class="form-control" id="maxPrice" name="maxPrice" placeholder="1000" {% if filters.maxPrice %}value="{{ filters.maxPrice }}" {% endif %}>
           </div>
         </div>
       </div>
       <div id="catalog-items" class="col-md-9">
         <div class="input-group" id="itemSearch">
-          <input type="search" class="form-control rounded" placeholder="Search" name="search" aria-label="Search"
-            aria-describedby="search-addon" {% if filters.search %}value="{{ filters.search }}"{% endif %}/>
+          <input type="search" class="form-control rounded" placeholder="Search" name="search" aria-label="Search" aria-describedby="search-addon" {% if filters.search %}value="{{ filters.search }}" {% endif %} />
           <button type="submit" class="btn btn-outline-primary">search</button>
         </div>
         <div id="items">
@@ -48,21 +47,22 @@
           </div>
           {% endfor %}
         </div>
-        <div class="form-group row">
-          <label for="itemsPerPage" class="col-sm-6 col-form-label">Items / page</label>
-          <div class="col-sm-6">
-            <input type="number" class="form-control" id="itemsPerPage"  name="itemsPerPage" placeholder="20" {% if filters.itemsPerPage %}value="{{ filters.itemsPerPage }}"{% endif %}>
+        <br>
+        <div id="bottom" style="position: relative;">
+          <input type="number" class="form-control" id="page" hidden name="page" placeholder="0" {% if filters.page %}value="{{ filters.page }}" {% endif %}>
+          <div id="pagination"></div>
+          <div class="form-group" style="display: flex; align-items: center; justify-content: center;">
+            <label for="itemsPerPage" class="col-form-label" style="margin-right: 10px;">Items per page:</label>
+            <div style="width: 100px;">
+              <input type="number" class="form-control" id="itemsPerPage" name="itemsPerPage" placeholder="20" {% if filters.itemsPerPage %}value="{{ filters.itemsPerPage }}" {% endif %}>
+            </div>
           </div>
         </div>
 
-        <input type="number" class="form-control" id="page" hidden name="page" placeholder="0" {% if filters.page %}value="{{ filters.page }}"{% endif %}>
-        <br>
-        <div id="pagination">
-        </div>
       </div>
       <script>
-        
-        function setPage(page){
+
+        function setPage(page) {
           $("#page").val(page)
         }
 
@@ -70,7 +70,7 @@
           {% if search %}
           $("#itemSearch input").val("{{ search }}")
           {% endif %}
-          
+
           $("#pagination").append(`
           <nav aria-label="Page navigation example">
             <ul class="pagination justify-content-center">
@@ -87,7 +87,7 @@
           </nav>
           `)
 
-          $(".number-link").click((x)=>{
+          $(".number-link").click((x) => {
             setPage($(x.currentTarget).text())
           })
 

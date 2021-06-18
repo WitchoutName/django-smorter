@@ -13,6 +13,9 @@
             <a class="btn btn-outline-dark" id="items" href="{% url 'admin_shop' shop.id 'items' %}">Items</a>
             <a class="btn btn-outline-dark" id="orders" href="{% url 'admin_shop' shop.id 'orders' %}">Orders</a>
         </div>
+        <div class="btn-group-vertical" role="group" aria-label="Basic radio toggle button group" style="position: absolute; right: -155px;">
+            <a class="btn btn-outline-success" id="detaisdfls" href="{% url 'view_shop' shop.id %}">View this shop</a>
+        </div>
     </div>
     {% if tab == "details" %}
         {% include "eshop/shop/admin/details.html" %}

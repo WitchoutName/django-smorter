@@ -1,10 +1,12 @@
+{% load tags %}
+
 
 {% block content %}
 <div>
     {% if method != "PUT" %}
-        <form method="{{ method }}" action="{% url 'create_item' shop.id %}?{{ query_path }}" enctype="multipart/form-data">
+        <form method="{{ method }}" action="{% url 'create_item' shop.id %}?{{ query_path }}" enctype="multipart/form-data">    
     {% else %}
-        <form method="POST" action="{% url 'create_item' shop.id %}?{{ query_path }}" enctype="multipart/form-data">
+        <form method="POST" action="{% url 'edit_item' shop.id item.id %}?{{ query_path }}" enctype="multipart/form-data">
     {% endif %}
         {% csrf_token %}
         {{ item_form.title }}
@@ -17,30 +19,64 @@
         {{ item_form.price.errors }}
         <input class="form-control mb-3" type="file" name="images" multiple accept="image/*" id="id_images">
         {{ item_form.images.errors }}
+        {{ item_form.specs }}
         <!--<input type="text" name="images" maxlength="100" id="images">
         <label for="note-image">Images</label>
         <input type="file" name="images" class="form-control-file" id="images" multiple>-->
-        <h5 class="text-center">Options</h5>
-        <ul class="list-group list-group-flush mb-3" style="border-color" id="optionsList">
-            <li class="list-group-item">
-                <div class="row">
-                    <div class="col-md-5">
-                        <input class="form-control" type="text" placeholder="Option name">
+        <h5 class="text-center">Parameters</h5>
+        <ul class="list-group list-group-flush mb-3" style="border-color" id="parameterList">
+    
+    
+        <form method="POST" action="{% url 'create_item' shop.id %}?{{ query_path }}" enctype="multipart/form-data">
+            {% if method == "PUT" %}
+                {% for spec in specs %}
+                <li class="list-group-item">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <input class="form-control" type="text" placeholder="Parameter name" value="{{ spec }}">
+                        </div>
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <input type="search" class="form-control rounded" placeholder="Add your options..."/>
+                                <div class="btn btn-outline-success"  onClick="add_option(this)">Add</div>
+                            </div>
+                            <ul class="list-group">
+                                {% for option in specs|attr:spec %}
+                                <li class="list-group-item item-parameter-option"><span>{{ option }}</span><i class="fa fa-times cross-icon-small" onclick='del_option(this)'></i></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="col-md-1 text-end">
+                            <i class="fa fa-times cross-icon-big" onClick="del_parameter(this)"></i>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <input type="search" class="form-control rounded" placeholder="Add your options..."/>
-                        <ul class="list-group" id="userList">
-                            <li class="list-group-item" style="display: flex; justify-content: space-between; align-items: center; cursor:default;"><span>Option</span><i class="fa fa-times" onclick='del_admin(this)' style="font-size:20px; color:red; cursor:pointer;"></i></li>
-                            <li class="list-group-item" style="cursor: pointer;">Option 2</li>
-                        </ul>
+                </li>
+                {% endfor %}
+            {% else %}    
+                <li class="list-group-item">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <input class="form-control" type="text" placeholder="Parameter name">
+                        </div>
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <input type="search" class="form-control rounded" placeholder="Add your options..."/>
+                                <div class="btn btn-outline-success"  onClick="add_option(this)">Add</div>
+                            </div>
+                            <ul class="list-group">
+                                <li class="list-group-item item-parameter-option"><span>Option</span><i class="fa fa-times cross-icon-small" onclick='del_option(this)'></i></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-1 text-end">
+                            <i class="fa fa-times cross-icon-big" onClick="del_parameter(this)"></i>
+                        </div>
                     </div>
-                    <div class="col-md-1 text-end">
-                        <i class="fa fa-times" style="font-size:25px; color:red; cursor:pointer;"></i>
-                    </div>
-                </div>
-            </li>
-            <li class="list-group-item"><a>ddd</a></li>
+                </li>
+            {% endif %}
         </ul>
+        <div style="display: flex; justify-content: center; align-items: center;">
+            <div class="btn btn-outline-success" onClick="add_parameter()">Add new parameter</div>
+        </div>
         <br>
         {% if method != "PUT" %}
             <button type="submit" class="btn btn-success">Add item</button>
@@ -52,26 +88,65 @@
 </div>
 
 <script>
-$(document).ready(function() {
-    $("#id_path").val("{{ path }}")
-    $("#optionsList").append(`
-                <li class="list-group-item">
-                    <div class="row">
-                        <div class="col-md-5">
-                            <input class="form-control" type="text" placeholder="Option name">
-                        </div>
-                        <div class="col-md-6">
-                            <input type="search" class="form-control rounded" placeholder="Add your options..."/>
-                            <ul class="list-group" id="userList">
-                                <li class="list-group-item" style="display: flex; justify-content: space-between; align-items: center; cursor:default;"><span>Option</span><i class="fa fa-times" onclick='del_admin(this)' style="font-size:20px; color:red; cursor:pointer;"></i></li>
-                                <li class="list-group-item" style="cursor: pointer;">Option 2</li>
-                            </ul>
-                        </div>
-                        <div class="col-md-1 text-end">
-                            <i class="fa fa-times" style="font-size:25px; color:red; cursor:pointer;"></i>
-                        </div>
+    function del_option(element){
+        $(element).parent().remove()
+        set_parameters()
+    }
+
+    function del_parameter(element){
+        $(element).parent().parent().parent().remove()
+        set_parameters()
+    }
+
+    function add_option(element){
+        let input = $($(element).parent().children()[0])
+        let list = $($(element).parent().parent().children()[1]).append(`
+            <li class="list-group-item item-parameter-option"><span>${input.val()}</span><i class="fa fa-times cross-icon-small" onclick='del_option(this)'></i></li>
+        `)
+        input.val("")
+        set_parameters()
+    }
+
+    function add_parameter(){
+        $("#parameterList").append(`
+            <li class="list-group-item">
+                <div class="row">
+                    <div class="col-md-5">
+                        <input class="form-control" type="text" placeholder="Parameter name">
                     </div>
-                </li>`)
-});
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <input type="search" class="form-control rounded" placeholder="Add your options..."/>
+                            <div class="btn btn-outline-success"  onClick="add_option(this)">Add</div>
+                        </div>
+                        <ul class="list-group">
+                        </ul>
+                    </div>
+                    <div class="col-md-1 text-end">
+                        <i class="fa fa-times cross-icon-big" onClick="del_parameter(this)"></i>
+                    </div>
+                </div>
+            </li>
+        `)
+        set_parameters()
+    }
+
+    function set_parameters(){
+        let res = {}
+        $("#parameterList").children().filter(function(){
+            let title = $(this).find("div div input").val()
+            if (title != ""){
+                res[title] = []
+                for (let option of $(this).find("div div ul li span").toArray())
+                    res[title].push(option.textContent)
+            }
+        })
+
+        $("#id_specs").val(JSON.stringify(res))
+    }
+
+    $(document).ready(function() {
+        $("#id_path").val("{{ path }}")
+    });
 </script>
 {% endblock %}

@@ -79,7 +79,7 @@ class ItemCreateForm(forms.ModelForm):
 
     class Meta:
         model = Item
-        fields = ["shop", "title", "description", "path", "price", "images"]
+        fields = ["shop", "title", "description", "path", "price", "images", "specs"]
         labels = {x: "" for x in fields}
         widgets = {
             "title": forms.TextInput(attrs={'class': 'form-control mb-3', 'placeholder': 'Item title', 'required': 'true'}),
@@ -87,4 +87,5 @@ class ItemCreateForm(forms.ModelForm):
             "path": forms.TextInput(attrs={'class': 'form-control mb-3', 'placeholder': 'Item path'}),
             "price": forms.NumberInput(attrs={'class': 'form-control mb-3', 'placeholder': 'Item price'}),
             "images": forms.FileInput(attrs={'class': 'form-control mb-3'}),
+            "specs": forms.TextInput(attrs={"hidden": ""})
         }

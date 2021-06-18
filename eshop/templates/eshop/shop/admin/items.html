@@ -43,7 +43,7 @@
                             <td style="width: 15%;">{{ item.title }}</td>
                             <td>{{ item.description }}</td>
                             <td>{{ item.price }}</td>
-                            <td><a class="breadcrumb-item" style="cursor: pointer;">Edit</a></td>
+                            <td><a class="breadcrumb-item" style="cursor: pointer;" href="{% url 'edit_item' shop.id item.id %}?{{ query_path }}">Edit</a></td>
                         </tr>
                     {% endfor %}
                 </tbody>

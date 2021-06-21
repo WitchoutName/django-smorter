@@ -7,12 +7,14 @@
   <br>
   <br>
   <h1 class="text-center">Checkout</h1>
+  <form method="POST" action="{% url 'checkout_post'  'buy' %}">
   <div class="row">
     <div class="col-md-7">
+      <input name="address" id="address-input" type="text" hidden>
       <div id="address">
         {% for address in user.smorteruser.address_set.all %}
-        <div class="card">
-          <div class="card-title text-end address-title"><i class="fa fa-times cross-icon-big" onClick="remove_address({{ address.id }})"></i></div>
+        <div class="card" adr-id="{{ address.id }}">
+          <div class="card-title text-end address-title"><div class="adr-select"></div><i class="fa fa-times cross-icon-big" onClick="remove_address({{ address.id }})"></i></div>
           <div class="card-body" style="padding-top: 0;">
             <p><b>Name:</b> {{address.name}}</p>
             <p><b>Address, Zip:</b> {{address.address1}}, {{address.zip_code}}</p>
@@ -22,17 +24,46 @@
         {% endfor %}
       </div>
       <br>
-      <form method="POST" action="{% url 'checkout' %}">
+      <form method="POST" action="{% url 'checkout_post' 'address' %}">
         {% csrf_token %}
         {{ form }}
         <button type="submit" class="btn btn-success">Add Billing address</button>
       </form>
 
     </div>
-    <div class="col-md-5" style="height: 400px; background-color: red;">
-
+    <div class="col-md-5" style="">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Item</th>
+            <th scope="col">Params</th>
+            <th scope="col" class="text-end">Price</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in user.smorteruser.cart.items.all %}
+          <tr>
+            <td>{{ item.item.title }}</td>
+            <td><ul class="list-group list-group-flush cart-param">
+              {% for attr, val in item|item_specs %}
+                <li class="list-group-item">{{ attr }}: {{ val }}</li>
+              {% endfor %}
+            </td></ul>
+            <td class="text-end">{{ item.count }} x {{ item.item.price }} = <b style="font-size: large;">{% widthratio item.count 1 item.item.price %}$</b></td>
+            <td><i class="fa fa-times cross-icon-small" onClick="remove_item({{ item.id }})"></i></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+          <div class="cart-footer">
+              <button type="submit" class="btn btn-success btn-lg">Buy all</button>
+              <div>Total: <b>{{ user.smorteruser.cart|cart_total }}$</b></div>
+          </div>
     </div>
+
   </div>
+  </form>
   <br>
 </div>
 <script>
@@ -51,9 +82,19 @@
       }).then(()=>{location.reload()})
     }
 
+  function select_address(element){
+    id = $(element).parent().parent().parent().attr("adr-id")
+    $("#address-input").val(id)
+    $(".adr-select").html(`<button class="btn btn-primary btn-sm" onClick="select_address(this)">Select</button>`)
+    $(`[adr-id='${id}'] .adr-select`).html("<b>Selected</b>")
+  }
+
   $(document).ready(function() {
     $("#id_country").attr("class", "form-control mb-3")
     $("#id_country > option:first").text("Country")
+    $(".adr-select").append(`<button class="btn btn-primary btn-sm" onClick="select_address(this)">Select</button>`)
+    $(".adr-select:first").html("<b>Selected</b>")
+    $("#address-input").val($(".adr-select:first").parent().parent().attr("adr-id"))
   })
 </script>
 {% endblock %}

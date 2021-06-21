@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from django.shortcuts import redirect
 
 urlpatterns = [
     path("", views.home, name="home"),
@@ -17,6 +18,7 @@ urlpatterns = [
     path('shop/<int:id>/admin/item/delete/', views.delete_items, name="delete_items"),
     path('remove_cart_item/', views.remove_cart_item, name="remove_cart_item"),
     path('catalog/', views.catalog, name="catalog"),
-    path('checkout/', views.checkout, name="checkout"),
+    path('checkout/', views.redirect_checkout, name="checkout"),
+    path('checkout/<slug:mode>/', views.checkout, name="checkout_post"),
     path('remove_address', views.delete_address, name="remove_address")
 ]

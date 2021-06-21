@@ -333,7 +333,7 @@ def remove_cart_item(request):
         return HttpResponse("no", status=500)
 
 
-def checkout(request):
+def checkout(request, mode):
     if request.user.is_authenticated:
         if request.method == 'POST':
             form_input = {**request.POST}
@@ -344,7 +344,7 @@ def checkout(request):
                 address = form.save()
                 address.user = request.user.smorteruser
                 address.save()
-                return HttpResponseRedirect(f"/checkout/")
+                return HttpResponseRedirect(f"/checkout/address/")
             else:
                 print(form.errors)
         else:
@@ -353,6 +353,10 @@ def checkout(request):
         return render(request, "checkout.html", {"form": form})
     else:
         return redirect("login")
+
+
+def redirect_checkout(request):
+    return redirect("/checkout/address/")
 
 
 def delete_address(request):

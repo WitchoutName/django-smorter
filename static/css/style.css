@@ -408,6 +408,14 @@ div {
 
 .address-title{
     margin: 0 !important;
-    padding-top: 10px !important;
-    padding-right: 10px !important;
+    padding: 10px !important;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom: 1px rgb(204, 204, 204) solid;
+
+}
+
+.address-title b{
+font-weight: 900 !important;
 }

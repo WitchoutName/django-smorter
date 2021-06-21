@@ -27,7 +27,6 @@
         <ul class="list-group list-group-flush mb-3" style="border-color" id="parameterList">
     
     
-        <form method="POST" action="{% url 'create_item' shop.id %}?{{ query_path }}" enctype="multipart/form-data">
             {% if method == "PUT" %}
                 {% for spec in specs %}
                 <li class="list-group-item">
@@ -100,9 +99,12 @@
 
     function add_option(element){
         let input = $($(element).parent().children()[0])
-        let list = $($(element).parent().parent().children()[1]).append(`
-            <li class="list-group-item item-parameter-option"><span>${input.val()}</span><i class="fa fa-times cross-icon-small" onclick='del_option(this)'></i></li>
-        `)
+        let list = $($(element).parent().parent().children()[1])
+        if(input.val() != "" && !(list.find("li").toArray().map((x,y)=>{return x.textContent}).includes(input.val()))){
+            list.append(`
+                <li class="list-group-item item-parameter-option"><span>${input.val()}</span><i class="fa fa-times cross-icon-small" onclick='del_option(this)'></i></li>
+            `)
+        }
         input.val("")
         set_parameters()
     }

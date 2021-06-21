@@ -1,3 +1,5 @@
+{% load tags %}
+
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
     <a class="navbar-brand" href="{% url "home" %}">Smorter</a>
@@ -14,6 +16,40 @@
         </li>
       </ul>
         {% if user.is_authenticated %}
+        <li class="cart" id="cart">
+          <i onclick="show_cart()" class="fa fa-shopping-cart"></i>
+          <div class="cart-item-count" onclick="show_cart()" >{{ user.smorteruser.cart.items.count }}</div>
+          <div id="cart-preview">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Item</th>
+                  <th scope="col">Params</th>
+                  <th scope="col" class="text-end">Price</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in user.smorteruser.cart.items.all %}
+                <tr>
+                  <td>{{ item.item.title }}</td>
+                  <td><ul class="list-group list-group-flush cart-param">
+                    {% for attr, val in item|item_specs %}
+                      <li class="list-group-item">{{ attr }}: {{ val }}</li>
+                    {% endfor %}
+                  </td></ul>
+                  <td class="text-end">{{ item.count }} x {{ item.item.price }} = <b style="font-size: large;">{% widthratio item.count 1 item.item.price %}$</b></td>
+                  <td><i class="fa fa-times cross-icon-small" onClick="remove_item({{ item.id }})"></i></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            <div class="cart-footer">
+              <a href="#" class="btn btn-primary">Checkout</a>
+              <div>Total: <b>{{ user.smorteruser.cart|cart_total }}$</b></div>
+            </div>
+          </div>
+        </li>
         <li class="nav-item dropdown navbar-nav">
           <a class="nav-link dropdown-toggle active" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             {{user.username}}
@@ -33,7 +69,50 @@
           <a class="nav-link" href="{% url "signup" %}">Sign up</a>
         </li>
         {% endif %}
-
     </div>
   </div>
 </nav>
+<script>
+  function show_cart(){
+    $("#cart-preview").css("display", $("#cart-preview").css("display") == "none" ? "unset" : "none")
+  }
+
+
+  function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+              const cookie = cookies[i].trim();
+              // Does this cookie string begin with the name we want?
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+  }
+
+  function remove_item(id){
+                let url = "{% url 'remove_cart_item' %}"
+                fetch(url,{
+                    method: "POST",
+                    headers:{
+                        "Content-type": "application/json",
+                        "X-CSRFToken": getCookie('csrftoken')
+
+                    },
+                    body: JSON.stringify({
+                        "item_id": id
+                    })
+                  }).then(()=>{location.reload()})
+                }
+
+  $(document).ready(function() {
+    window.onclick = function(event) {
+      if (!($("#cart-preview *, .fa-shopping-cart, .cart-item-count").toArray().includes(event.target)))
+        $("#cart-preview").css("display", "none")
+    }
+  })
+</script>

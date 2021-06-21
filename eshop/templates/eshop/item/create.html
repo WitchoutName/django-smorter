@@ -2,8 +2,11 @@
 
 {% block content %}
 <br><br>
-<div class="container" style="width: 40%;">
+<div class="container editable" style="width: 40%;">
     {% include "eshop/item/form.html" %}
+    {% if item %}
+        <a class="edit-btn btn btn-outline-success" href="{% url 'view_item' item.id %}">View</a>
+    {% endif %}
 </div>
 
 {% endblock %}

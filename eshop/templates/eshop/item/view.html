@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load tags %}
+{% load static %}
+
+{% block content %}
+    <div class="container editable">
+        <div class="row">
+            <div class="col-md-6">
+            <div class="img-wrapper">
+                <div>
+                    {% if item.itemimage_set.all|item_image %}
+                        <img id="main-img" src="{{ item.itemimage_set.all|item_image }}" alt="{{ item.title }}">
+                    {% else %}
+                        <img id="main-img" src="{% static 'img/item-placehloder.png' %}" alt="{{ item.title }}">
+                    {% endif %}
+                </div>
+            </div>
+            <div class="img-holder">
+                {% for img in item.itemimage_set.all %}
+                    <img src="{{ img.image.url }}" alt="{{ item.alt }}">
+                {% endfor %}
+            </div>
+            </div>
+            <div class="col-md-6">
+                <br>
+                <h2 class="item-view-title text-center">{{ item.title }}</h2>
+                <p class="item-description">{{ item.description }}</p>
+                {% if item.specs|jsonParse %}
+                    <h5 class="specs-title">Pick parameters</h5>
+                {% endif %}
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="text" id="specs-input" name="specs" hidden>
+                    <div id="specs">
+                        {% for spec in item.specs|jsonParse %}
+                            <div class="form-group specs-box">
+                                <h6 class="" >{{ spec }}</h6>
+                                <div class="btn-group" role="group" aria-label="Basic radio toggle button group{{ spec }}">
+                                    {% for option in item.specs|jsonParse|attr:spec %}
+                                        <input type="radio" class="btn-check" option="{{ option }}" name="btnradio{{spec}}" id="btnradio{{ option }}" autocomplete="off">
+                                        <label class="btn btn-outline-primary" onClick="click_radio(this)" for="btnradio{{ option }}">{{ option }}</label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                        <div class="form-group specs-box">
+                                <h6>Quantity</h6>
+                                <div class="qty">
+                                    <div class="minus bg-dark"><i onClick="click_minus()" class="fa fa-minus count-icon"></i></div>
+                                    <input type="number" name="qty" id="qty" value="1" hidden>
+                                    <div class="count">1</div>
+                                    <div class="minus bg-dark"><i onclick="click_plus()" class="fa fa-plus count-icon"></i></div>
+                                </div>
+                            </div>
+                    </div>
+                    <br><br>
+
+                    <div class="text-end">
+                        {% if user.is_authenticated %}
+                            <button type="sdfsdsubmit" class="btn btn-success btn-lg">Add to cart</button>
+                        {% else %}
+                            <a href="{% url 'login' %}" class="btn btn-success btn-lg">Login</a>
+                        {% endif %}
+                    </div>
+                </form>
+                
+            </div>
+        </div>
+        {% if user|is_admin:item.shop %}
+            <a class="edit-btn btn btn-outline-success" href="{% url 'edit_item' item.shop.id item.id %}">Edit</a>
+        {% endif %}
+        <a class="shop-btn btn btn-outline-success" href="{% url 'view_shop' item.shop.id %}">Shop</a>
+    </div>
+    <script>
+        function set_img(element) {
+            $("#main-img").attr("src", $(element).attr("src"))
+            if (element.naturalWidth > element.naturalHeight)
+                $("#main-img").attr("class", "widther")
+        }
+        
+        function click_radio(element){
+            $(element).parent().find("input").attr("checked-radio", "false")
+            $("#"+$(element).attr("for")).attr("checked-radio", "true")
+            update_specs(element)
+        }
+
+        function update_specs(element){
+            console.log(JSON.stringify($("[checked-radio='true']").toArray().map(x=>$(x).attr("option"))))
+            $("#specs-input").val(JSON.stringify($("[checked-radio='true']").toArray().map(x=>$(x).attr("option"))))
+        }
+
+        function click_plus(){
+            $('#qty').val(parseInt($('#qty').val()) + 1 );
+            $('.count').text($('#qty').val());
+        };
+        function click_minus(){
+            $('#qty').val(parseInt($('#qty').val()) - 1 );
+                if ($('#qty').val() == 0) {
+                    $('#qty').val(1);
+                }
+            $('.count').text($('#qty').val());
+        };
+
+       $(document).ready(function() {
+            $(".img-holder img").hover(function(){
+                set_img(this)
+                $(".img-holder img").attr("class", "")
+                $(this).attr("class", "active-img")
+            })
+            $(".img-holder img:first").attr("class", "active-img")
+            if ($(".img-holder img:first")[0])
+                set_img($(".img-holder img:first")[0])
+            
+
+            $(".btn-group").filter(function(){
+                $(this).find("label:first")[0].click()
+            }) 
+
+       })
+    </script>
+{% endblock %}

@@ -16,21 +16,28 @@
                 <h3>Categories</h3>
                 <ul></ul>
             </div>
-            <div class="col-md-9" id="items">
+            <div class="col-md-9 editable" id="items">
                 {% for item in shop.item_set.all %}
                 <div class="card item" path="{{item.path}}">
                     <div class="card-body">
-                        {% if item.itemimage_set.all|item_image %}
-                            <img class="card-img-top" src="{{ item.itemimage_set.all|item_image }}" alt="{{ item.title }}">
-                        {% else %}
-                            <img class="card-img-top" src="{% static 'img/item-placehloder.png' %}" alt="{{ item.title }}">
-                        {% endif %}
-                        <h5 class="card-title">{{ item.title }}</h5>
+                         <div class="img-wrapper">
+                            <div class="item-card-img">
+                                {% if item.itemimage_set.all|item_image %}
+                                    <img id="main-img" {% if item.itemimage_set.all|widther %}class="widther"{% endif %} src="{{ item.itemimage_set.all|item_image }}" alt="{{ item.title }}">
+                                {% else %}
+                                    <img id="main-img" src="{% static 'img/item-placehloder.png' %}" alt="{{ item.title }}">
+                                {% endif %}
+                            </div>
+                        </div>
+                        <h5 class="card-title item-title">{{ item.title }}</h5>
                         <p class="card-text">{{ item.price }}</p>
-                        <a href="#" class="btn btn-primary btn-sm">View</a>
+                        <a href="{% url 'view_item' item.id %}" class="btn btn-primary btn-sm">View</a>
                     </div>
                 </div>
                 {% endfor %}
+                {% if user|is_admin:shop %}
+                    <a class="edit-btn btn btn-outline-success" href="{% url 'admin_shop' shop.id 'details' %}">Edit</a>
+                {% endif %}
             </div>
         </div>
     </div>

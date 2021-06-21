@@ -1,3 +1,4 @@
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
@@ -35,13 +36,16 @@ def shop(request, id):
     shop = get_object_or_404(Shop, id=id)
     query = dict(request.GET.lists())
     categories = get_shop_categories(shop)
-
     return render(request, 'eshop/shop/view.html', {"shop":  shop, "categories": categories})
 
 
 def my_shops(request):
     shops = [a for tup in [list(Shop.objects.filter(admin_group__name=x.name)) for x in request.user.smorteruser.groups.all()] for a in tup]
     return render(request, 'eshop/myshops.html', {"shops":  shops})
+
+
+def is_shop_admin(user, shop):
+    return user.is_authenticated and shop.admin_group in user.smorteruser.groups.all()
 
 
 def set_shop_admins(shop, admins):
@@ -101,7 +105,6 @@ def create_shop(request):
 
 def delete_shop(request, id):
     shop = Shop.objects.get(id=id)
-    print("auth", shop.owner, request.user.smorteruser)
     if shop.owner == request.user.smorteruser:
         shop.delete()
     return redirect('my_shops')
@@ -115,36 +118,39 @@ def leave_shop(request, id):
 
 def admin_shop(request, id, tab, item_id=None, *args, **kwargs):
     shop = get_object_or_404(Shop, id=id)
-    query = dict(request.GET.lists())
-    current = get_shop_current_cat(shop, query)
-    bread = [["".join([f'category={sus}&' for sus in current["path"][:i+1]])[:-1], sub] for i, sub in enumerate(current["path"])]
-    cur_subs = [x for x in current if x not in ["items", "path"]]
-    subs = [["".join([f'category={sus}&' for sus in (current["path"] if "path" in current else []) +[sub]])[:-1], sub] for sub in cur_subs]
-    if request.method == 'POST':
-        form_input = {**request.POST}
+    if is_shop_admin(request.user, shop):
+        query = dict(request.GET.lists())
+        current = get_shop_current_cat(shop, query)
+        bread = [["".join([f'category={sus}&' for sus in current["path"][:i+1]])[:-1], sub] for i, sub in enumerate(current["path"])]
+        cur_subs = [x for x in current if x not in ["items", "path"]]
+        subs = [["".join([f'category={sus}&' for sus in (current["path"] if "path" in current else []) +[sub]])[:-1], sub] for sub in cur_subs]
+        if request.method == 'POST':
+            form_input = {**request.POST}
 
-        for x in form_input.keys():
-            if "methods" not in x:
-                form_input[x] = form_input[x][0]
-        form_input["owner"] = shop.owner
-        form_input["owner_id"] = form_input["owner"].id
-        form_input["admin_group"] = SmorterGroup.objects.get(name=f"Shop{shop.id}AdminGroup")
-        admins = form_input["admins"]
-        detail_form = ShopCreateForm(form_input, request.FILES, instance=shop)
-        if detail_form.is_valid():
-            set_shop_admins(shop, admins)
-            detail_form.save()
+            for x in form_input.keys():
+                if "methods" not in x:
+                    form_input[x] = form_input[x][0]
+            form_input["owner"] = shop.owner
+            form_input["owner_id"] = form_input["owner"].id
+            form_input["admin_group"] = SmorterGroup.objects.get(name=f"Shop{shop.id}AdminGroup")
+            admins = form_input["admins"]
+            detail_form = ShopCreateForm(form_input, request.FILES, instance=shop)
+            if detail_form.is_valid():
+                set_shop_admins(shop, admins)
+                detail_form.save()
 
+            else:
+                print(detail_form.errors)
         else:
-            print(detail_form.errors)
+            detail_form = ShopCreateForm(instance=shop)
+        return render(request, 'eshop/shop/admin/admin_base.html',
+                      {'detail_form': detail_form, "users": User.objects.all(),
+                       "method": "PUT", "shop": shop,
+                       "tab": tab, "current": current, "query_path": (bread[-1][0] if bread else ""),
+                       "bread": bread, "subs": subs,
+                       })
     else:
-        detail_form = ShopCreateForm(instance=shop)
-    return render(request, 'eshop/shop/admin/admin_base.html',
-                  {'detail_form': detail_form, "users": User.objects.all(),
-                   "method": "PUT", "shop": shop,
-                   "tab": tab, "current": current, "query_path": (bread[-1][0] if bread else ""),
-                   "bread": bread, "subs": subs,
-                   })
+        return redirect("catalog")
 
 
 def add_item(dic, buffer, item):
@@ -176,6 +182,18 @@ def get_shop_categories(shop):
 def get_shop_current_cat(shop, query):
     cats = get_shop_categories(shop)
     return get_deep_dict(cats, query["category"] if "category" in query else [])
+
+
+def view_item(request, id):
+    item = get_object_or_404(Item, id=id)
+    if request.method == 'POST':
+        form_input = {**request.POST}
+        print(form_input)
+        oitem = OrderedItem.objects.create(item=item, specs=form_input["specs"][0], count=form_input["qty"][0])
+        request.user.smorteruser.cart.items.add(oitem)
+        return HttpResponseRedirect(f"/item/{item.id}/")
+
+    return render(request, "eshop/item/view.html", {"item": item})
 
 
 def create_item(request, id, *args, **kwargs):
@@ -267,6 +285,10 @@ def bs(*args):
 
 @csrf_exempt
 def catalog(request):
+    for x in range(20):
+        obj = Item.objects.get(pk=34)
+        obj.pk = None
+        obj.save()
     filters = {x: y[0] for x, y in {**request.POST}.items()}
     for x, y in [["search", None], ["minPrice", None], ["maxPrice", None], ["itemsPerPage", 20], ["page", 1]]:
         if x not in filters:
@@ -296,3 +318,16 @@ def catalog(request):
         filters["page"] = len(page_items)
 
     return render(request, 'catalog.html', {"items":  page_items[filters["page"]-1], "filters": filters, "page_count": len(page_items)})
+
+
+def remove_cart_item(request):
+    body = json.loads(request.body)
+    try:
+        if "item_id" in body:
+            item = get_object_or_404(OrderedItem, id=body["item_id"])
+            item.delete()
+            return HttpResponse("yes", status=200)
+        else:
+            return HttpResponse("no", status=500)
+    except Exception as e:
+        return HttpResponse("no", status=500)

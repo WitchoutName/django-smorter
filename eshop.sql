@@ -550,46 +550,46 @@ INSERT INTO `warehouse_has_item` (`warehouse_idwarehouse`, `item_iditem`, `count
 --
 
 --
--- Klíče pro tabulku `account`
+-- Klíče pro tabulku `account`
 --
 ALTER TABLE `account`
   ADD PRIMARY KEY (`username`),
   ADD KEY `contact_idcontact` (`contact_idcontact`);
 
 --
--- Klíče pro tabulku `brand`
+-- Klíče pro tabulku `brand`
 --
 ALTER TABLE `brand`
   ADD PRIMARY KEY (`name`),
   ADD KEY `company_name` (`company_name`);
 
 --
--- Klíče pro tabulku `choice`
+-- Klíče pro tabulku `choice`
 --
 ALTER TABLE `choice`
   ADD PRIMARY KEY (`idchoice`);
 
 --
--- Klíče pro tabulku `company`
+-- Klíče pro tabulku `company`
 --
 ALTER TABLE `company`
   ADD PRIMARY KEY (`name`),
   ADD KEY `account_username` (`account_username`);
 
 --
--- Klíče pro tabulku `contact`
+-- Klíče pro tabulku `contact`
 --
 ALTER TABLE `contact`
   ADD PRIMARY KEY (`idcontact`);
 
 --
--- Klíče pro tabulku `group`
+-- Klíče pro tabulku `group`
 --
 ALTER TABLE `group`
   ADD PRIMARY KEY (`idgroup`);
 
 --
--- Klíče pro tabulku `group_has_rights`
+-- Klíče pro tabulku `group_has_rights`
 --
 ALTER TABLE `group_has_rights`
   ADD PRIMARY KEY (`group_idgroup`,`rights_idrights`),
@@ -597,21 +597,21 @@ ALTER TABLE `group_has_rights`
   ADD KEY `group_idgroup` (`group_idgroup`);
 
 --
--- Klíče pro tabulku `item`
+-- Klíče pro tabulku `item`
 --
 ALTER TABLE `item`
   ADD PRIMARY KEY (`iditem`),
   ADD KEY `shop_brand_name` (`shop_brand_name`);
 
 --
--- Klíče pro tabulku `options`
+-- Klíče pro tabulku `options`
 --
 ALTER TABLE `options`
   ADD PRIMARY KEY (`name`),
   ADD KEY `item_iditem` (`item_iditem`);
 
 --
--- Klíče pro tabulku `options_has_choice`
+-- Klíče pro tabulku `options_has_choice`
 --
 ALTER TABLE `options_has_choice`
   ADD PRIMARY KEY (`options_name`,`choice_idchoice`),
@@ -619,7 +619,7 @@ ALTER TABLE `options_has_choice`
   ADD KEY `option_name` (`options_name`);
 
 --
--- Klíče pro tabulku `order`
+-- Klíče pro tabulku `order`
 --
 ALTER TABLE `order`
   ADD PRIMARY KEY (`idorder`),
@@ -630,7 +630,7 @@ ALTER TABLE `order`
   ADD KEY `status_idstatus` (`status_idstatus`);
 
 --
--- Klíče pro tabulku `order_has_item`
+-- Klíče pro tabulku `order_has_item`
 --
 ALTER TABLE `order_has_item`
   ADD PRIMARY KEY (`order_idorder`,`item_iditem`),
@@ -638,7 +638,7 @@ ALTER TABLE `order_has_item`
   ADD KEY `order_idorder` (`order_idorder`);
 
 --
--- Klíče pro tabulku `order_has_item_has_options`
+-- Klíče pro tabulku `order_has_item_has_options`
 --
 ALTER TABLE `order_has_item_has_options`
   ADD PRIMARY KEY (`order_idorder`,`item_iditem`,`options_name`),
@@ -646,13 +646,13 @@ ALTER TABLE `order_has_item_has_options`
   ADD KEY `order_has_item` (`order_idorder`,`item_iditem`);
 
 --
--- Klíče pro tabulku `payment_method`
+-- Klíče pro tabulku `payment_method`
 --
 ALTER TABLE `payment_method`
   ADD PRIMARY KEY (`name`);
 
 --
--- Klíče pro tabulku `person`
+-- Klíče pro tabulku `person`
 --
 ALTER TABLE `person`
   ADD PRIMARY KEY (`account_username`),
@@ -660,25 +660,25 @@ ALTER TABLE `person`
   ADD KEY `company_name` (`company_name`);
 
 --
--- Klíče pro tabulku `rights`
+-- Klíče pro tabulku `rights`
 --
 ALTER TABLE `rights`
   ADD PRIMARY KEY (`idrights`);
 
 --
--- Klíče pro tabulku `shippment_method`
+-- Klíče pro tabulku `shippment_method`
 --
 ALTER TABLE `shippment_method`
   ADD PRIMARY KEY (`name`);
 
 --
--- Klíče pro tabulku `shop`
+-- Klíče pro tabulku `shop`
 --
 ALTER TABLE `shop`
   ADD PRIMARY KEY (`brand_name`);
 
 --
--- Klíče pro tabulku `shop_has_group`
+-- Klíče pro tabulku `shop_has_group`
 --
 ALTER TABLE `shop_has_group`
   ADD PRIMARY KEY (`shop_brand_name`,`group_idgroup`),
@@ -686,7 +686,7 @@ ALTER TABLE `shop_has_group`
   ADD KEY `shop_brand_name` (`shop_brand_name`);
 
 --
--- Klíče pro tabulku `shop_has_payment_method`
+-- Klíče pro tabulku `shop_has_payment_method`
 --
 ALTER TABLE `shop_has_payment_method`
   ADD PRIMARY KEY (`shop_brand_name`,`payment_method_name`),
@@ -694,7 +694,7 @@ ALTER TABLE `shop_has_payment_method`
   ADD KEY `shop_brand_name` (`shop_brand_name`);
 
 --
--- Klíče pro tabulku `shop_has_shippment_method`
+-- Klíče pro tabulku `shop_has_shippment_method`
 --
 ALTER TABLE `shop_has_shippment_method`
   ADD PRIMARY KEY (`shop_brand_name`,`shippment_method_name`),
@@ -702,13 +702,13 @@ ALTER TABLE `shop_has_shippment_method`
   ADD KEY `shop_brand_name` (`shop_brand_name`);
 
 --
--- Klíče pro tabulku `status`
+-- Klíče pro tabulku `status`
 --
 ALTER TABLE `status`
   ADD PRIMARY KEY (`idstatus`);
 
 --
--- Klíče pro tabulku `warehouse`
+-- Klíče pro tabulku `warehouse`
 --
 ALTER TABLE `warehouse`
   ADD PRIMARY KEY (`idwarehouse`),
@@ -716,7 +716,7 @@ ALTER TABLE `warehouse`
   ADD KEY `company_name` (`company_name`);
 
 --
--- Klíče pro tabulku `warehouse_has_item`
+-- Klíče pro tabulku `warehouse_has_item`
 --
 ALTER TABLE `warehouse_has_item`
   ADD PRIMARY KEY (`warehouse_idwarehouse`,`item_iditem`),

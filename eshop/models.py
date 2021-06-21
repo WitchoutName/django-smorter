@@ -4,6 +4,9 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 import datetime, json, os
+from iso3166 import countries
+
+countries_codes = [[x.alpha3, x.name] for x in countries]
 
 
 def item_img_path(instance, filename):
@@ -149,6 +152,20 @@ class Cart(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.items.count()} items"
+
+
+class Address(models.Model):
+    name = models.CharField("Full name", max_length=1024)
+    address1 = models.CharField("Address line 1", max_length=1024)
+    address2 = models.CharField("Address line 2", max_length=1024, null=True, blank=True)
+    zip_code = models.CharField("ZIP / Postal code", max_length=12)
+    city = models.CharField("City", max_length=1024)
+    country = models.CharField("Country", max_length=3, choices=countries_codes)
+    user = models.ForeignKey(SmorterUser, on_delete=models.CASCADE, null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Shipping Address"
+        verbose_name_plural = "Shipping Addresses"
 
 
 class Order(models.Model):

@@ -89,3 +89,18 @@ class ItemCreateForm(forms.ModelForm):
             "images": forms.FileInput(attrs={'class': 'form-control mb-3'}),
             "specs": forms.TextInput(attrs={"hidden": ""})
         }
+
+
+class AddressCreateFrom(forms.ModelForm):
+
+    class Meta:
+        model = Address
+        fields = ["name", "address1", "address2", "zip_code", "city", "country"]
+        labels = {x: "" for x in fields}
+        widgets = {
+            "name": forms.TextInput(attrs={'class': 'form-control mb-3', 'placeholder': 'Name', 'required': 'true'}),
+            "address1": forms.TextInput(attrs={'class': 'form-control mb-3', 'placeholder': 'Billing address', 'required': 'true'}),
+            "address2": forms.TextInput(attrs={'class': 'form-control mb-3', 'placeholder': 'Billing address 2'}),
+            "zip_code": forms.NumberInput(attrs={'class': 'form-control mb-3', 'placeholder': 'Zip code', 'required': 'true'}),
+            "city": forms.TextInput(attrs={'class': 'form-control mb-3', 'placeholder': 'City', 'required': 'true'}),
+        }

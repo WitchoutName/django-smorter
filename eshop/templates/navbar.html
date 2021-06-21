@@ -45,7 +45,7 @@
               </tbody>
             </table>
             <div class="cart-footer">
-              <a href="#" class="btn btn-primary">Checkout</a>
+              <a href="{% url 'checkout' %}" class="btn btn-primary">Checkout</a>
               <div>Total: <b>{{ user.smorteruser.cart|cart_total }}$</b></div>
             </div>
           </div>

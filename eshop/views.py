@@ -331,3 +331,38 @@ def remove_cart_item(request):
             return HttpResponse("no", status=500)
     except Exception as e:
         return HttpResponse("no", status=500)
+
+
+def checkout(request):
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+            form_input = {**request.POST}
+            for x in form_input.keys():
+                form_input[x] = form_input[x][0]
+            form = AddressCreateFrom(form_input)
+            if form.is_valid():
+                address = form.save()
+                address.user = request.user.smorteruser
+                address.save()
+                return HttpResponseRedirect(f"/checkout/")
+            else:
+                print(form.errors)
+        else:
+            form = AddressCreateFrom()
+
+        return render(request, "checkout.html", {"form": form})
+    else:
+        return redirect("login")
+
+
+def delete_address(request):
+    body = json.loads(request.body)
+    try:
+        if "address_id" in body:
+            address = get_object_or_404(Address, id=body["address_id"])
+            address.delete()
+            return HttpResponse("yes", status=200)
+        else:
+            return HttpResponse("no", status=500)
+    except Exception as e:
+        return HttpResponse("no", status=500)

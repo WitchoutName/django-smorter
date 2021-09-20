@@ -20,4 +20,4 @@ python manage.py runserver
 ```
 
 ## Showcase
-[Short video showcase](static/showcase/smorter-showcase.mp4)
+<video src='static/showcase/smorter-showcase.mp4' width=180/>

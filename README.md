@@ -20,4 +20,4 @@ python manage.py runserver
 ```
 
 ## Showcase
-[Link to video showcase](https://github.com/WitchoutName/django-smorter/blob/master/static/showcase/smorter-showcase.mp4)
+[Link to video showcase](https://www.youtube.com/watch?v=Qy0BGfDgb88)
